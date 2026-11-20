@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/macos,windows,python,react,java,intellij,intellij+iml,intellij+all
-# Edit at https://www.toptal.com/developers/gitignore?templates=macos,windows,python,react,java,intellij,intellij+iml,intellij+all
+# Created by https://www.toptal.com/developers/gitignore/api/macos,windows,python,java,intellij,intellij+iml,intellij+all
+# Edit at https://www.toptal.com/developers/gitignore?templates=macos,windows,python,java,intellij,intellij+iml,intellij+all
 
 ### Intellij ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
@@ -306,6 +306,8 @@ downloads/
 eggs/
 .eggs/
 lib/
+# frontend src/lib/ ignore 방지
+!frontend/src/lib/ 
 lib64/
 parts/
 sdist/
@@ -458,21 +460,6 @@ poetry.toml
 
 # LSP config files
 pyrightconfig.json
-
-### react ###
-.DS_*
-logs
-**/*.backup.*
-**/*.back.*
-
-node_modules
-bower_components
-
-*.sublime*
-
-psd
-thumb
-sketch
 
 ### Windows ###
 # Windows thumbnail cache files
