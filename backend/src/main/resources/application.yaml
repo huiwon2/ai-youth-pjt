@@ -1,8 +1,12 @@
 spring:
   application:
     name: ai-youth-pjt
+  config:
+    # backend/.env를 자동으로 읽음 (작업 디렉터리가 backend 폴더여야 함)
+    # OS 환경변수나 IntelliJ 실행 설정에 값을 넣으면 그 값이 우선 적용됨
+    import: optional:file:.env[.properties]
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/ai_youth_pjt_db}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/${DB_NAME:ai_youth_pjt_db}}
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD}
 

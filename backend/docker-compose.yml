@@ -1,3 +1,6 @@
+# 프로젝트 이름 고정 (없으면 폴더명 "backend"가 이름이 되어 기존 DB 볼륨을 못 찾음)
+name: ai-youth-pjt
+
 services:
   postgres:
     image: postgres:18
