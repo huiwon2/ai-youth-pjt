@@ -1,0 +1,73 @@
+# ===========================================
+# Backend (Spring Boot + Gradle) .gitignore
+# 루트 .gitignore와 함께 적용됨
+# ===========================================
+
+### Gradle ###
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+# 루트 .gitignore의 *.jar 규칙 때문에 wrapper jar가 무시되지 않도록 예외 처리
+
+### Spring Boot ###
+HELP.md
+*.log
+logs/
+
+### 환경 변수 / 비밀 설정 (API 키, DB 비밀번호 등) ###
+.env
+.env.*
+!.env.example
+application-local.yml
+application-local.yaml
+application-secret.yml
+application-secret.yaml
+application-*.properties
+!application.properties
+
+### IntelliJ IDEA ###
+# (루트의 .idea 규칙은 루트 폴더에만 적용되므로 여기서 다시 지정)
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### Eclipse / STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### macOS ###
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+
+### Windows ###
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk

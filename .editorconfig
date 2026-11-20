@@ -1,0 +1,15 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 2
+
+[*.{java,gradle,xml,sql,py}]
+indent_size = 4
+
+# .gitattributes와 맞춤: Windows 스크립트는 CRLF
+[*.{bat,cmd}]
+end_of_line = crlf

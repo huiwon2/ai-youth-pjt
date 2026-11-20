@@ -1,0 +1,22 @@
+# Windows / macOS 협업 시 줄바꿈(CRLF/LF) 충돌 방지
+# 텍스트 파일은 저장소에 LF로 저장
+* text=auto eol=lf
+
+# 스크립트별 줄바꿈 고정
+*.sh        text eol=lf
+gradlew     text eol=lf
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+
+# 바이너리 파일
+*.jar   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.pdf   binary
