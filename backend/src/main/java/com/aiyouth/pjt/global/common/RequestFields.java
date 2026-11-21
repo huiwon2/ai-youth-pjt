@@ -47,7 +47,7 @@ public final class RequestFields {
 
     public String text(String name, int maxLength) {
         JsonNode value = required(name);
-        if (!value.isTextual() || value.asString().isBlank() || value.asString().length() > maxLength
+        if (!value.isString() || value.asString().isBlank() || value.asString().length() > maxLength
                 || value.asString().indexOf(0) >= 0) {
             throw invalid(name, "FORMAT");
         }

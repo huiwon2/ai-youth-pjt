@@ -7,7 +7,7 @@ public final class GeoDistance {
     private GeoDistance() {}
 
     public static Double coordinate(JsonNode value, int max) {
-        if (value.isNumber() || value.isTextual()) {
+        if (value.isNumber() || value.isString()) {
             try {
                 double coordinate = Double.parseDouble(value.asString());
                 return Double.isFinite(coordinate) && Math.abs(coordinate) <= max ? coordinate : null;
