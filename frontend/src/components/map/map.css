@@ -1,0 +1,15 @@
+.location-diagram, .kakao-map { position: relative; width: 100%; height: clamp(280px, 42vh, 440px); margin-block: 12px; border-radius: 12px; overflow: hidden; background-color: #eef3ed; }
+.location-diagram { background-image: linear-gradient(#dce5db 1px, transparent 1px), linear-gradient(90deg, #dce5db 1px, transparent 1px); background-size: 32px 32px; }
+.location-diagram svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.map-pin { display: inline-block; white-space: nowrap; padding: 4px 8px; border-radius: 8px; font: 700 .85rem/1.4 system-ui,sans-serif; box-shadow: 0 1px 4px #182d2733; }
+button.map-pin.home { min-height: 32px; background: white; color: #155742; border: 2px solid #155742; }
+button.map-pin.home[aria-pressed="true"] { background: #155742; color: white; z-index: 4; }
+.location-diagram .map-pin { position: absolute; transform: translate(-50%, -50%); }
+.location-diagram .map-pin.home { transform: translate(-50%, -100%); }
+.location-diagram .map-pin.destination { transform: translate(-50%, 0); }
+.map-pin.home { z-index: 3; }
+.map-pin.destination { background: #6e420d; color: white; z-index: 2; }
+.map-pin.facility { border-radius: 50%; padding: 0 4px; color: #175a8c; background: white; }
+.map-detail { border-top: 1px solid var(--border); padding-top: 12px; }
+.map-detail h4 { margin: 12px 0 4px; }
+.map-detail ul { margin-block: 0; }

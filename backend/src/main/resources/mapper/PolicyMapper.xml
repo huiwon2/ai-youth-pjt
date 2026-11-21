@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiyouth.pjt.mapper.PolicyMapper">
+
+    <sql id="columns">
+        id, policy_key, source, external_id, name, review_decision, organization, service_field, summary,
+        benefit::text AS benefit, application::text AS application, eligibility::text AS eligibility,
+        source_url, source_modified_at_raw
+    </sql>
+
+    <select id="findByReviewDecision" resultType="com.aiyouth.pjt.model.Policy">
+        SELECT <include refid="columns"/>
+        FROM policies
+        WHERE review_decision = #{decision}
+        ORDER BY policy_key
+    </select>
+
+    <select id="findByPolicyKey" resultType="com.aiyouth.pjt.model.Policy">
+        SELECT <include refid="columns"/>
+        FROM policies
+        WHERE policy_key = #{policyKey}
+    </select>
+</mapper>
