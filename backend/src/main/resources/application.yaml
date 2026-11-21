@@ -9,8 +9,24 @@ spring:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/${DB_NAME:ai_youth_pjt_db}}
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD}
+  jackson:
+    deserialization:
+      fail-on-trailing-tokens: true
+      fail-on-reading-dup-tree-key: true
+      use-big-decimal-for-floats: true
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
+  type-handlers-package: com.aiyouth.pjt.global.mybatis
   configuration:
     map-underscore-to-camel-case: true
+
+firsthome:
+  allowed-origins: ${FIRSTHOME_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+  session:
+    ttl-days: ${FIRSTHOME_SESSION_TTL_DAYS:7}
+    cookie-secure: ${FIRSTHOME_SESSION_COOKIE_SECURE:true}
+  places:
+    demo: ${FIRSTHOME_DEMO_PLACES:false}
+    kakao-key: ${KAKAO_REST_API_KEY:}
+    odsay-key: ${ODSAY_WEB_KEY:}
