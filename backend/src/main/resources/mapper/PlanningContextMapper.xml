@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiyouth.pjt.mapper.PlanningContextMapper">
+
+    <select id="findSession" resultType="com.aiyouth.pjt.model.planning.SessionRow">
+        SELECT id, access_token_hash, assessment_date, revision, priority_preset,
+               score_weights::text AS score_weights, expires_at
+        FROM planning_sessions
+        WHERE id = #{sessionId}
+    </select>
+
+    <select id="findProfile" resultType="com.aiyouth.pjt.model.planning.ProfileRow">
+        SELECT age_years, age_as_of_date, employment_status, available_cash_won, monthly_income_won,
+               is_homeless, max_commute_minutes, additional_answers::text AS additional_answers, confirmed_at
+        FROM profiles
+        WHERE session_id = #{sessionId}
+    </select>
+
+    <select id="findDestination" resultType="com.aiyouth.pjt.model.planning.DestinationRow">
+        SELECT name, confirmed_address
+        FROM frequent_places
+        WHERE session_id = #{sessionId}
+    </select>
+
+    <select id="findHomes" resultType="com.aiyouth.pjt.model.planning.HomeRow">
+        SELECT id, slot_no, label, confirmed_address, housing_type, deposit_won, monthly_rent_won,
+               maintenance_won, exclusive_area_m2
+        FROM candidate_homes
+        WHERE session_id = #{sessionId}
+        ORDER BY slot_no
+    </select>
+
+    <update id="updatePreferences">
+        UPDATE planning_sessions
+        SET priority_preset = #{priorityPreset},
+            score_weights = CAST(#{scoreWeightsJson} AS jsonb),
+            revision = revision + 1,
+            updated_at = now()
+        WHERE id = #{sessionId}
+          AND revision = #{expectedRevision}
+    </update>
+</mapper>

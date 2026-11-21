@@ -61,6 +61,14 @@ DB_PASSWORD=<비밀번호>
 > - 값에 따옴표(`"`)를 붙이지 마세요. 따옴표까지 값으로 인식됩니다.
 > - `.env`는 `.gitignore`에 포함되어 있어 커밋되지 않습니다. 절대 커밋하지 마세요.
 
+선택 설정 (지원 판정·비교·공고문 질문)
+
+| 키 | 기본값 | 의미 |
+|---|---|---|
+| `DEMO_MODE` | `false` | `true`면 승인된 시연 조건(만 27세·월 230만·보증금 2,000만·멀티캠퍼스) 입력에만 기획서 예시 값(520만 원, 87점 등)을 사용. 응답의 `calculationVersion`이 `demo:`로 시작 |
+| `RAG_SERVICE_ENABLED` | `false` | 공고문 질문에 Python RAG 서비스를 호출. 꺼져 있거나 응답이 없으면 DB 원문 발췌로 대체 |
+| `RAG_SERVICE_URL` | `http://localhost:8000` | Python RAG 서비스 주소. 계약은 [docs/rag-service-contract.md](docs/rag-service-contract.md) |
+
 ## 3. DB 실행 (Docker)
 
 **`backend` 폴더**에서 실행합니다.

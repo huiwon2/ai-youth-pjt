@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiyouth.pjt.mapper.RagChunkMapper">
+
+    <sql id="columns">
+        c.id, c.policy_id, c.source_key, c.document_key, c.document_revision, c.chunk_index, c.section,
+        c.content, c.source_url, c.locator, c.content_hash, c.verification_status, c.is_active AS active,
+        p.name AS policy_name
+    </sql>
+
+    <!-- 검색 근거 조건: 검증 완료 + 활성 + 원문 링크나 위치 중 하나 이상 (ERD 6절) -->
+    <sql id="usable">
+        c.verification_status = 'VERIFIED'
+        AND c.is_active
+        AND (c.source_url IS NOT NULL OR c.locator IS NOT NULL)
+    </sql>
+
+    <select id="findVerifiedByIds" resultType="com.aiyouth.pjt.model.RagChunk">
+        SELECT <include refid="columns"/>
+        FROM rag_chunks c
+        LEFT JOIN policies p ON p.id = c.policy_id
+        WHERE <include refid="usable"/>
+          AND c.id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </select>
+
+    <select id="findVerifiedBySourceKeys" resultType="com.aiyouth.pjt.model.RagChunk">
+        SELECT <include refid="columns"/>
+        FROM rag_chunks c
+        LEFT JOIN policies p ON p.id = c.policy_id
+        WHERE <include refid="usable"/>
+          AND c.source_key IN
+        <foreach collection="sourceKeys" item="k" open="(" separator="," close=")">#{k}</foreach>
+        ORDER BY c.source_key, c.document_key, c.chunk_index
+    </select>
+
+    <select id="searchVerifiedByKeywords" resultType="com.aiyouth.pjt.model.RagChunk">
+        SELECT <include refid="columns"/>
+        FROM rag_chunks c
+        LEFT JOIN policies p ON p.id = c.policy_id
+        WHERE <include refid="usable"/>
+        <if test="policyKey != null">
+          AND c.source_key = #{policyKey}
+        </if>
+          AND (
+        <foreach collection="keywords" item="kw" separator=" OR ">
+            c.content ILIKE '%' || #{kw} || '%'
+        </foreach>
+          )
+        ORDER BY c.document_key, c.chunk_index
+        LIMIT #{limit}
+    </select>
+</mapper>

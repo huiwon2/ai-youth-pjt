@@ -12,5 +12,16 @@ spring:
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
+  type-handlers-package: com.aiyouth.pjt.global.mybatis
   configuration:
     map-underscore-to-camel-case: true
+
+firsthome:
+  demo:
+    # true면 승인된 시연 조건(만 27세·월 230만·보증금 2,000만·멀티캠퍼스)과 일치하는 입력에만 시연 값을 사용
+    enabled: ${DEMO_MODE:false}
+  rag:
+    # 공고문 질문(API 6)의 Python RAG 서비스. 꺼져 있거나 응답이 없으면 DB 원문 발췌로 대체
+    enabled: ${RAG_SERVICE_ENABLED:false}
+    base-url: ${RAG_SERVICE_URL:http://localhost:8000}
+    timeout: ${RAG_SERVICE_TIMEOUT:8s}
