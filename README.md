@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/readme-hero.svg" alt="First Home Navi · 2026 서울AI디지털배움터 청년 AI 해커톤 26팀. 공고문과 집 모양 지도 핀을 연결한 일러스트" width="960">
+  <img src="docs/readme-hero.svg" alt="첫집내비 · 2026 서울AI디지털배움터 청년 AI 해커톤 26팀. 공고문과 집 모양 지도 핀을 연결한 일러스트" width="960">
 </p>
 
 # 🏡 첫집내비
