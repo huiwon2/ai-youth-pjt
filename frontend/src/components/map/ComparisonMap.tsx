@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { demo } from '../../api/firsthome'
 import { loadMaps, type KakaoMap, type Maps } from '../../lib/kakao/sdk'
 import type { Comparison, Profile } from '../../types/contracts'
 import { facilityText, homeTitle, travel } from '../../utils/home'
@@ -91,6 +90,7 @@ function MapCanvas({ data, selected, onSelect }: { data: MapData; selected: stri
 }
 
 export default function ComparisonMap({ result, destination }: { result: Comparison; destination: Profile['frequentPlace'] }) {
+  const demo = result.calculationVersion.startsWith('demo:')
   const [open, setOpen] = useState(false)
   const [id, select] = useState(result.homes[0]?.homeId)
   const home = result.homes.find(item => item.homeId === id) ?? result.homes[0]
@@ -109,7 +109,7 @@ export default function ComparisonMap({ result, destination }: { result: Compari
       <div className="map-detail" aria-live="polite">
         <h3>{homeTitle(home)}</h3><p>{home.location.address}</p>
         <p>편도 이동 · {travel(route)}{route.distanceMeters !== null && ' · ' + route.distanceMeters.toLocaleString('ko-KR') + 'm'}</p>
-        <p>{route.status === 'ESTIMATED' ? '거리 기반 추정값이에요.' : route.status === 'OK' ? (demo ? '시연 경로예요.' : '조회한 경로예요.') :
+        <p>{route.status === 'ESTIMATED' ? '거리 기반 추정값이에요.' : route.status === 'OK' ? (route.source === 'DEMO' ? '시연 경로예요.' : '조회한 경로예요.') :
           route.status === 'NOT_FOUND' ? '이 목적지까지의 경로를 찾지 못했어요.' : '이동 경로 조회에 실패했어요.'}
           {' '}{data.path.length ? (data.estimated ? '점선은 추정 경로예요.' : '실선으로 경로를 표시했어요.') : '표시할 경로 좌표가 없어요.'}</p>
         <h4>주변 시설</h4>{home.facilities.length ? <ul>{home.facilities.map((item, index) =>

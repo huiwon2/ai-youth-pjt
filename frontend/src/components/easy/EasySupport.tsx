@@ -1,11 +1,11 @@
 import { Link } from 'react-router'
-import { demo } from '../../api/firsthome'
 import type { PolicyEvaluation } from '../../types/contracts'
 import { money } from '../../utils/money'
 
 export default function EasySupport({ result }: { result: PolicyEvaluation }) {
   const { summary, policies, checklist } = result
-  const none = policies.every(policy => policy.eligibilityStatus === 'NOT_MET')
+  const demo = result.calculationVersion.startsWith('demo:')
+  const none = policies.length > 0 && policies.every(policy => policy.eligibilityStatus === 'NOT_MET')
   const tasks = checklist.length ? checklist : result.calendar
   const pending = policies.filter(policy => policy.eligibilityStatus === 'CHECK_NEEDED')
   const available = policies.filter(policy => policy.eligibilityStatus === 'MET')
@@ -17,10 +17,11 @@ export default function EasySupport({ result }: { result: PolicyEvaluation }) {
       {summary.totalStatus === 'PARTIAL' && <p>금액을 확인한 지원만 더했어요.</p>}
       {summary.potentialTotalWon === null && <p>지원 금액을 확인할 정보가 더 필요해요.</p>}
     </section>
+    {policies.length === 0 && <p>조회된 지원 정보가 없어요</p>}
     {none && <section className="panel scenario"><h2>현재 조건에 맞는 지원이 없어요</h2>
-      {policies.length === 0 ? <p>이번 조회에서 해당하는 정책을 찾지 못했어요.</p> : <ul>{policies.map(policy =>
+      <ul>{policies.map(policy =>
         <li key={policy.policyKey}>{policy.name} · {policy.conditions.filter(condition => condition.status === 'NOT_MET').map(condition => condition.reason || condition.label).join(' / ') || '공고의 신청 조건과 맞지 않아요.'}</li>
-      )}</ul>}
+      )}</ul>
     </section>}
     <section className="panel scenario"><h2>지금 할 일</h2>
       {tasks.length > 0 ? <ul>{tasks.map((task, index) => <li key={index}>{task.title} {task.startDate}{task.endDate && ' ~ ' + task.endDate}</li>)}</ul> :

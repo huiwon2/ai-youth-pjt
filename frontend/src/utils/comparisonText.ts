@@ -1,4 +1,3 @@
-import { demo } from '../api/firsthome'
 import type { Comparison, Session } from '../types/contracts'
 import type { SavedPolicy } from '../stores/savedPolicies'
 import { comparisonRows } from './comparisonRows'
@@ -7,6 +6,7 @@ import { slotName } from './home'
 import { money } from './money'
 
 export function comparisonText(session: Session, result: Comparison, saved: SavedPolicy[]) {
+  const demo = result.calculationVersion.startsWith('demo:')
   const p = session.profile
   const unknown = '미확인'
   const age = p.age && (p.age.exactYears ?? (p.age.minYears + '~' + p.age.maxYears))

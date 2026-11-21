@@ -48,7 +48,7 @@ public class LocationChoices {
     public ChosenLocation resolve(UUID sessionId, UUID id, String kind) {
         ChoiceRow row = mapper.findChoice(sessionId, id);
         if (row == null || !row.kind().equals(kind) || !row.expiresAt().isAfter(state.now())) {
-            throw ApiException.notFound();
+            throw new ApiException(404, "LOCATION_SELECTION_UNAVAILABLE", "선택한 주소를 다시 검색해 주세요.", false);
         }
         StoredChoice stored = json.readValue(row.details(), StoredChoice.class);
         if (!stored.choice().selectable()) {

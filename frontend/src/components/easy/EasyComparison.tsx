@@ -1,10 +1,10 @@
 import { Link } from 'react-router'
-import { demo } from '../../api/firsthome'
 import type { Comparison } from '../../types/contracts'
 import { money } from '../../utils/money'
 import { slotName, travel } from '../../utils/home'
 
 export default function EasyComparison({ result }: { result: Comparison }) {
+  const demo = result.calculationVersion.startsWith('demo:')
   const allUnknown = result.homes.length > 0 && result.homes.every(home => home.cost.maintenanceWon === null)
   const winner = result.homes.find(home => home.homeId === result.recommendation.homeId)
   return <>
@@ -23,6 +23,7 @@ export default function EasyComparison({ result }: { result: Comparison }) {
     <div className="easy-homes">{result.homes.map(home => <section className="panel" key={home.homeId}>
       <h3>후보 {slotName(home.slot)} · {home.label}</h3>
       <dl>
+        <div><dt>순위</dt><dd>{home.rank == null ? '순위 보류' : home.rank + '위'}</dd></div>
         <div><dt>한 달 주거비</dt><dd>{money(home.cost.monthlyHousingCostWon)}{home.cost.excludedUnknownMaintenance && ' + 관리비 별도'}</dd></div>
         <div><dt>관리비</dt><dd>{home.cost.maintenanceWon === null ? '미확인' : money(home.cost.maintenanceWon)}</dd></div>
         <div><dt>편도 이동시간</dt><dd>{travel(home.route)}</dd></div>

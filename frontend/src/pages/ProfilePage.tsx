@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
-import { api, demo } from '../api/firsthome'
-import { errorMessage } from '../api/errors'
+import { api } from '../api/firsthome'
+import { ApiError, errorMessage } from '../api/errors'
 import { useProfileDraft } from '../hooks/useProfileDraft'
 import { won } from '../utils/money'
 import type { LocationSearch, ProfilePatch, Session } from '../types/contracts'
@@ -37,7 +37,7 @@ export default function ProfilePage({ session, easy, onSave, onError }: {
   const birthYear = /^\d{4}$/.test(birth) && Number(birth) >= 1000 && Number(birth) <= year ? Number(birth) : null
   const cashWon = won(cash)
   const incomeWon = won(income)
-  const destination = place ? { name: place.name, address: place.roadAddress ?? place.parcelAddress } : profile.frequentPlace
+  const destination = place ? { name: place.name, address: place.roadAddress ?? place.parcelAddress } : draft.needsPlace ? null : profile.frequentPlace
   const commuteLimit: ProfilePatch['commuteLimit'] = unlimited ? { type: 'NO_LIMIT' } :
     /^\d+$/.test(commute) && Number.isSafeInteger(Number(commute)) ? { type: 'LIMIT', minutes: Number(commute) } : null
   const moveIn = selected(moving, move)
@@ -90,6 +90,12 @@ export default function ProfilePage({ session, easy, onSave, onError }: {
       onSave(result)
       if (!result.progress.canEvaluate) setError('서버에서 확인이 필요한 항목이 있어요. 입력을 확인해 주세요.')
     } catch (reason) {
+      if (reason instanceof ApiError && reason.status === 404 && reason.code === 'LOCATION_SELECTION_UNAVAILABLE') {
+        update({ place: null, needsPlace: true, step: 7 })
+        setResults(null)
+        setSearchError('목적지 선택이 만료됐어요. 다시 검색해 선택해 주세요.')
+        return
+      }
       setError(errorMessage(reason))
       onError(reason)
     } finally {
@@ -122,7 +128,7 @@ export default function ProfilePage({ session, easy, onSave, onError }: {
     </> },
     { label: '자주 가는 곳', summary: destination?.name ?? '', control: <>
       <div className="input-row">
-        <input aria-label="회사·학교·역 이름" value={query} disabled={searching} placeholder={demo ? '예: 멀티캠퍼스 역삼' : '회사·학교·역 이름'} onChange={event => { update({ query: event.target.value }); setResults(null); setSearchError('') }} onKeyDown={event => {
+        <input aria-label="회사·학교·역 이름" value={query} disabled={searching} placeholder="회사·학교·역 이름" onChange={event => { update({ query: event.target.value }); setResults(null); setSearchError('') }} onKeyDown={event => {
           if (event.key === 'Enter' && !event.nativeEvent.isComposing) { event.preventDefault(); void search() }
         }} />
         <button className="secondary" type="button" disabled={!query.trim() || searching} onClick={() => void search()}>{searching ? '검색 중…' : '검색'}</button>
@@ -130,7 +136,7 @@ export default function ProfilePage({ session, easy, onSave, onError }: {
       {searchError && <small role="alert" className="error">{searchError}</small>}
       {results?.length === 0 && <small role="status">검색 결과가 없어요. 장소 이름이나 주소를 다시 확인해 주세요.</small>}
       {!!results?.length && <ul className="search-results">{results.map(item => <li key={item.locationId}>
-        <button className="secondary" type="button" disabled={!item.selectable} onClick={() => { update({ place: item }); setResults(null) }}>
+        <button className="secondary" type="button" disabled={!item.selectable} onClick={() => { update({ place: item, needsPlace: false }); setResults(null) }}>
           {item.name}<small>{item.roadAddress ?? item.parcelAddress}{!item.selectable && ' · 선택할 수 없는 주소'}</small>
         </button>
       </li>)}</ul>}
