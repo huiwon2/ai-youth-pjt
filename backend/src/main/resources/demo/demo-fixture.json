@@ -4,7 +4,8 @@
   "notes": [
     "27세 520만 원 = 국토부 청년월세 최대 480만 원 + 중개보수·이사비 최대 40만 원 (기획서 4쪽). 서울시 청년월세는 중복 수급 제한으로 제외.",
     "35세 280만 원의 구성은 기획서에 없다. 국토부 청년월세 연령(만 19~34세) 제외 후 서울시 청년월세 240만 원(월 20만 원 × 12개월) + 40만 원으로 추정했다. 팀 확인 필요.",
-    "비교 점수 87·77점은 점수 환산식이 보류된 상태의 기획서 참고값이며 BALANCED에서만 사용한다."
+    "비교 점수 87·77점은 점수 환산식이 보류된 상태의 기획서 참고값이며 BALANCED에서만 사용한다.",
+    "시연 경로(성수 30분·역삼 도보 13분·신림 30분)는 백엔드 1의 DemoPlaces(FIRSTHOME_DEMO_PLACES)가 공급한다."
   ],
   "condition": {
     "ageYears": 27,
@@ -131,9 +132,9 @@
     "monthlySupportWon": 200000,
     "supportPolicyKey": "DEMO-MOLIT-YOUTH-RENT",
     "homes": [
-      {"slot": 1, "monthlyRentWon": 600000, "maintenanceWon": 70000, "routeMode": "TRANSIT", "durationSeconds": 1800, "totalScore": 87, "rank": 1},
-      {"slot": 2, "monthlyRentWon": 900000, "maintenanceWon": 100000, "routeMode": "WALK", "durationSeconds": 780, "totalScore": 77, "rank": 2},
-      {"slot": 3, "monthlyRentWon": 420000, "maintenanceWon": null, "routeMode": "TRANSIT", "durationSeconds": 1800, "totalScore": null, "rank": null}
+      {"slot": 1, "monthlyRentWon": 600000, "maintenanceWon": 70000, "totalScore": 87, "rank": 1},
+      {"slot": 2, "monthlyRentWon": 900000, "maintenanceWon": 100000, "totalScore": 77, "rank": 2},
+      {"slot": 3, "monthlyRentWon": 420000, "maintenanceWon": null, "totalScore": null, "rank": null}
     ]
   }
 }

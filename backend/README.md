@@ -65,7 +65,7 @@ DB_PASSWORD=<비밀번호>
 
 | 키 | 기본값 | 의미 |
 |---|---|---|
-| `DEMO_MODE` | `false` | `true`면 승인된 시연 조건(만 27세·월 230만·보증금 2,000만·멀티캠퍼스) 입력에만 기획서 예시 값(520만 원, 87점 등)을 사용. 응답의 `calculationVersion`이 `demo:`로 시작 |
+| `DEMO_MODE` | `false` | `true`면 승인된 시연 조건(만 27세·월 230만·보증금 2,000만·멀티캠퍼스) 입력에만 기획서 예시 값(520만 원, 87점 등)을 사용. 응답의 `calculationVersion`이 `demo:`로 시작. 시연 경로·장소는 `FIRSTHOME_DEMO_PLACES=true`와 함께 사용 |
 | `RAG_SERVICE_ENABLED` | `false` | 공고문 질문에 Python RAG 서비스를 호출. 꺼져 있거나 응답이 없으면 DB 원문 발췌로 대체 |
 | `RAG_SERVICE_URL` | `http://localhost:8000` | Python RAG 서비스 주소. 계약은 [docs/rag-service-contract.md](docs/rag-service-contract.md) |
 
@@ -153,7 +153,39 @@ backend/src/main/
 > **Flyway 주의**: 이미 적용된 `V*.sql` 파일은 수정하지 말고, 변경 사항은 새 버전 파일(`V3__...sql`)로 추가하세요.
 > 수정하면 다른 팀원 실행 시 checksum 오류가 납니다.
 
-## 7. 에러가 나면
+## 7. 첫집내비 세션과 후보 API
+
+`POST /api/v1/sessions`에 `{}`를 보내면 `201`과 작업 쿠키를 받습니다. 세션 ID를 보관하고 이후 호출에 같은 쿠키를 사용합니다. 아래 경로의 `{sessionId}`는 생성 응답의 ID입니다.
+
+| 기능 | 경로 | 요청 예시 |
+|---|---|---|
+| 1. 작업 복원 | `GET /api/v1/sessions/{sessionId}` | 저장된 프로필, 진행도, 후보, 현재 `revision` 반환 |
+| 2. 주소 검색 | `POST /api/v1/sessions/{sessionId}/location-search` | `{"kind":"DESTINATION","query":"멀티캠퍼스 역삼"}` 또는 `{"kind":"HOME","query":"성수동2가 333-76"}` |
+| 3. 프로필 저장 | `PATCH /api/v1/sessions/{sessionId}/profile` | 헤더 `If-Match: "0"`, 본문 `{"birthYear":1991,"birthdayPassedThisYear":false,"frequentPlace":{"locationId":"<목적지 검색 ID>"}}` |
+| 7. 집 미리보기 | `POST /api/v1/sessions/{sessionId}/home-previews` | `{"inputRevision":1,"locationId":"<집 검색 ID>"}` |
+| 8. 집 저장·교체 | `PUT /api/v1/sessions/{sessionId}/homes/1` | 헤더 `If-Match: "1"`, 본문 `{"previewId":"<미리보기 ID>","depositWon":10000000,"monthlyRentWon":600000,"maintenanceWon":null}` |
+| 9. 집 삭제 | `DELETE /api/v1/sessions/{sessionId}/homes/1` | 저장 응답의 최신 `revision`을 `If-Match`로 보냄 |
+
+- 검색 결과의 `selectable:false` 항목은 선택할 수 없습니다. 검색 ID와 미리보기 ID는 각각 발급 후 15분 동안 사용할 수 있습니다. 목적지를 바꾸면 기존 미리보기로 저장할 때 `409 PREVIEW_EXPIRED`가 반환됩니다.
+- 경로 또는 시설 일부가 실패해도 미리보기는 `200`으로 응답합니다. 예를 들어 약국 조회에 실패하면 `facilities`의 약국 항목은 `status:"UNAVAILABLE"`이고 `warnings`에 `FACILITY_UNAVAILABLE`이 들어갑니다. 정상 조회에서 2km 안에 결과가 없으면 `NOT_FOUND`입니다.
+- 수정 요청에 최신 `If-Match`가 없으면 `428 PRECONDITION_REQUIRED`, 값이 다르면 `412 REVISION_MISMATCH`입니다. 오래된 `inputRevision`으로 미리보기를 요청하면 `409 STALE_INPUT`입니다. 만료된 세션의 응답 형태는 아래와 같습니다.
+
+```json
+{"error":{"code":"SESSION_EXPIRED","message":"작업 세션이 만료됐거나 쿠키를 확인할 수 없어요.","fields":[],"retryable":false},"requestId":"<요청 ID>"}
+```
+
+### 공급원과 로컬 시연
+
+- 실제 조회는 `backend/.env`의 `KAKAO_REST_API_KEY`, `ODSAY_WEB_KEY`를 사용합니다. 실데이터 모드에서 카카오 키가 없으면 주소 검색은 `503 UPSTREAM_UNAVAILABLE`입니다. ODsay 경로가 없거나 조회에 실패한 경우 가까운 거리는 `DISTANCE_ESTIMATE`로 도보 시간을 표시하고, 확인되지 않은 요금은 `null`로 반환합니다.
+- 키 없이 확인하려면 로컬 환경에서 `FIRSTHOME_DEMO_PLACES=true`로 실행합니다. 목적지에서 **멀티캠퍼스 역삼**, 집에서 **성수동2가 333-76**, **역삼동 778-26**, **신림동 502-36**을 검색할 수 있습니다. 검색과 시연 경로의 출처는 `DEMO`이고 준비된 데이터가 없는 시설은 `UNAVAILABLE`로 표시합니다.
+- 쿠키의 `Secure`는 기본적으로 켜져 있습니다. 로컬 HTTP 클라이언트가 쿠키를 전달하지 않으면 로컬 실행에 한해 `FIRSTHOME_SESSION_COOKIE_SECURE=false`를 사용합니다. 배포 환경의 공개 URL이 백엔드와 다른 경우 `FIRSTHOME_ALLOWED_ORIGINS`에 프론트의 공개 출처를 설정합니다. 세션 발급 후 유효기간의 기본값은 7일이며 `FIRSTHOME_SESSION_TTL_DAYS`로 조정합니다.
+
+### 지원·비교 기능에서 재사용
+
+- 지원 판정에 사용할 프로필은 `PlanningSessions.getForInput(sessionId, token, inputRevision)`에서 가져옵니다. 비교에 사용할 후보와 조회 정보는 `ComparisonInputs.load(sessionId, token, inputRevision)`에서 가져옵니다. 조회 도중 목적지나 계약값이 바뀌면 `STALE_INPUT`이 반환됩니다. 호출은 트랜잭션 밖에서 하고, 비교 결과 저장 직전에 해당 저장 트랜잭션에서 버전을 다시 확인합니다.
+- 수정 기능은 자신의 트랜잭션에서 `SessionState.lockOwned` → `Revisions.requireMatch` → 변경 저장 → `SessionState.advance` 순서로 사용합니다. 컨트롤러는 `SessionAuth.token`과 공통 오류 응답을 재사용할 수 있습니다.
+
+## 8. 에러가 나면
 
 | 메시지 | 원인 | 해결 |
 |---|---|---|

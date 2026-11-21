@@ -1,15 +1,15 @@
 package com.aiyouth.pjt.dto.response.comparison;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import com.aiyouth.pjt.dto.response.common.CommonTypes.Facility;
-import com.aiyouth.pjt.dto.response.common.CommonTypes.Location;
-import com.aiyouth.pjt.dto.response.common.CommonTypes.Route;
-import com.aiyouth.pjt.dto.response.common.CommonTypes.Warning;
-import com.aiyouth.pjt.dto.response.common.CommonTypes.Weights;
+import com.aiyouth.pjt.dto.response.PlanningResponse.Facility;
+import com.aiyouth.pjt.dto.response.PlanningResponse.Location;
+import com.aiyouth.pjt.dto.response.PlanningResponse.Route;
+import com.aiyouth.pjt.dto.response.PlanningResponse.Warning;
+import com.aiyouth.pjt.dto.response.PlanningResponse.Weights;
 import com.aiyouth.pjt.dto.response.policy.Evidence;
 import com.aiyouth.pjt.dto.response.policy.PolicyEvaluationResponse.Benefit;
 import com.aiyouth.pjt.dto.response.policy.PolicyEvaluationResponse.Condition;
@@ -20,7 +20,8 @@ import com.aiyouth.pjt.model.enums.PriorityPreset;
 
 /**
  * API 10 응답 (Comparison). result_snapshot에 isCurrent=false로 저장하고, 조회 시 isCurrent만 다시 계산한다.
- * calculationVersion이 "demo:"로 시작하면 점수·경로는 승인된 시연 데이터다.
+ * 위치·경로·시설·경고·가중치 타입은 백엔드 1의 PlanningResponse와 같은 것을 쓴다.
+ * calculationVersion이 "demo:"로 시작하면 점수·집별 지원 예시는 승인된 시연 데이터다.
  */
 public record ComparisonResponse(
         UUID comparisonId,
@@ -34,7 +35,7 @@ public record ComparisonResponse(
         List<ComparisonHome> homes,
         Recommendation recommendation,
         List<Warning> warnings,
-        OffsetDateTime calculatedAt) {
+        Instant calculatedAt) {
 
     public ComparisonResponse withCurrent(boolean current) {
         return new ComparisonResponse(comparisonId, inputRevision, assessmentDate, calculationVersion, status, current,

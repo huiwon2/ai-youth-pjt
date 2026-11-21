@@ -2,16 +2,17 @@ package com.aiyouth.pjt.service.comparison;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
 import com.aiyouth.pjt.calculator.HomeCostCalculator;
-import com.aiyouth.pjt.dto.response.common.CommonTypes.Route;
-import com.aiyouth.pjt.dto.response.common.CommonTypes.Weights;
+import com.aiyouth.pjt.dto.response.PlanningResponse.Route;
+import com.aiyouth.pjt.dto.response.PlanningResponse.Weights;
 import com.aiyouth.pjt.dto.response.comparison.ComparisonAnswerResponse;
 import com.aiyouth.pjt.dto.response.comparison.ComparisonResponse;
 import com.aiyouth.pjt.dto.response.comparison.ComparisonResponse.ComparisonHome;
@@ -21,19 +22,18 @@ import com.aiyouth.pjt.model.enums.AnswerSource;
 import com.aiyouth.pjt.model.enums.AnswerStatus;
 import com.aiyouth.pjt.model.enums.ComparisonStatus;
 import com.aiyouth.pjt.model.enums.PriorityPreset;
-import com.aiyouth.pjt.model.enums.RouteStatus;
 
 /** 기획서 8쪽: ‘역삼이랑 성수 차이는?’ → 월 33만 원, 편도 17분. */
 class ComparisonAnswerTest {
 
-    private static final OffsetDateTime NOW = OffsetDateTime.parse("2026-11-21T01:00:00Z");
+    private static final Instant NOW = Instant.parse("2026-11-21T01:00:00Z");
     private static final UUID A = UUID.randomUUID();
     private static final UUID B = UUID.randomUUID();
     private static final UUID C = UUID.randomUUID();
 
     private static ComparisonHome home(UUID id, int slot, String label, long rent, Long maintenance, int seconds,
                                        Integer score, Integer rank) {
-        Route route = new Route(RouteStatus.OK, "TRANSIT", "TEST", seconds, null, null, null, List.of(), null, NOW);
+        Route route = new Route("OK", "TRANSIT", "TEST", seconds, null, null, null, List.of(), null, NOW);
         return new ComparisonHome(id, slot, label, null,
                 HomeCostCalculator.calculate(10_000_000, rent, maintenance, 20_000_000L, null, null), route, List.of(),
                 List.of(), new Scores(null, null, null, score), rank);
@@ -45,7 +45,8 @@ class ComparisonAnswerTest {
                 home(B, 2, "역삼동 오피스텔", 900_000, 100_000L, 780, 77, 2),
                 home(C, 3, "신림동 원룸", 420_000, null, 1800, null, null));
         return new ComparisonResponse(UUID.randomUUID(), 5, LocalDate.of(2026, 11, 21), "demo:2026-11-19",
-                ComparisonStatus.PARTIAL, true, PriorityPreset.BALANCED, Weights.of(PriorityPreset.BALANCED), homes,
+                ComparisonStatus.PARTIAL, true, PriorityPreset.BALANCED,
+                new Weights(BigDecimal.valueOf(40), BigDecimal.valueOf(35), BigDecimal.valueOf(25)), homes,
                 ComparisonService.recommend(homes), List.of(), NOW);
     }
 
@@ -105,5 +106,23 @@ class ComparisonAnswerTest {
         assertThat(rec.homeId()).isNull();
         assertThat(rec.rankedHomeIds()).isEmpty();
         assertThat(rec.tradeoffs()).hasSize(2);
+    }
+
+    @Test
+    void 주소가_라벨이어도_동_이름으로_집을_찾는다() {
+        assertThat(ComparisonQuestionService.labelTokens("서울 성동구 성수동2가 333-76")).containsExactly("성수동", "성수");
+        assertThat(ComparisonQuestionService.labelTokens("역삼동 오피스텔")).containsExactly("역삼동", "역삼");
+        assertThat(ComparisonQuestionService.labelTokens("서울 강남구 역삼동 778-26")).containsExactly("역삼동", "역삼");
+
+        List<ComparisonHome> homes = List.of(
+                home(A, 1, "서울 성동구 성수동2가 333-76", 600_000, 70_000L, 1800, 87, 1),
+                home(B, 2, "서울 강남구 역삼동 778-26", 900_000, 100_000L, 780, 77, 2));
+        ComparisonResponse comparison = new ComparisonResponse(UUID.randomUUID(), 5, LocalDate.of(2026, 11, 21),
+                "demo:2026-11-19", ComparisonStatus.COMPLETE, true, PriorityPreset.BALANCED,
+                new Weights(BigDecimal.valueOf(40), BigDecimal.valueOf(35), BigDecimal.valueOf(25)), homes,
+                ComparisonService.recommend(homes), List.of(), NOW);
+
+        assertThat(ComparisonQuestionService.answer(comparison, "역삼이랑 성수 차이는?").answer())
+                .contains("한 달 33만 원 적게 들어요").contains("편도 17분 짧아요");
     }
 }

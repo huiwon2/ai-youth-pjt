@@ -2,31 +2,47 @@ package com.aiyouth.pjt.global.exception;
 
 import java.util.List;
 
-/** 명세의 ErrorResponse로 변환되는 예외. */
-public class ApiException extends RuntimeException {
+public final class ApiException extends RuntimeException {
+    private final int status;
+    private final ErrorDetails error;
 
-    private final ErrorCode code;
-    private final List<ErrorResponse.FieldError> fields;
-
-    public ApiException(ErrorCode code, String message) {
-        this(code, message, List.of());
+    public ApiException(int status, String code, String message, boolean retryable) {
+        this(status, code, message, retryable, List.of());
     }
 
-    public ApiException(ErrorCode code, String message, List<ErrorResponse.FieldError> fields) {
+    private ApiException(int status, String code, String message, boolean retryable, List<FieldError> fields) {
         super(message);
-        this.code = code;
-        this.fields = fields;
+        this.status = status;
+        this.error = new ErrorDetails(code, message, fields, retryable);
     }
 
-    public static ApiException field(ErrorCode code, String message, String field, String fieldCode) {
-        return new ApiException(code, message, List.of(new ErrorResponse.FieldError(field, fieldCode)));
+    public static ApiException invalid(String field, String code) {
+        return new ApiException(422, "FIELD_INVALID", "입력값을 확인해 주세요.", false,
+                List.of(new FieldError(field, code)));
     }
 
-    public ErrorCode code() {
-        return code;
+    public static ApiException withFields(int status, String code, String message, List<FieldError> fields) {
+        return new ApiException(status, code, message, false, List.copyOf(fields));
     }
 
-    public List<ErrorResponse.FieldError> fields() {
-        return fields;
+    public static ApiException missingDestination() {
+        return new ApiException(422, "PROFILE_INCOMPLETE", "자주 가는 곳을 먼저 저장해 주세요.", false,
+                List.of(new FieldError("profile.frequentPlace", "REQUIRED")));
     }
+
+    public static ApiException notFound() {
+        return new ApiException(404, "RESOURCE_NOT_FOUND", "요청한 정보를 찾을 수 없어요.", false);
+    }
+
+    public int status() {
+        return status;
+    }
+
+    public ErrorBody body(String requestId) {
+        return new ErrorBody(error, requestId);
+    }
+
+    public record FieldError(String field, String code) {}
+    public record ErrorDetails(String code, String message, List<FieldError> fields, boolean retryable) {}
+    public record ErrorBody(ErrorDetails error, String requestId) {}
 }

@@ -8,10 +8,10 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.aiyouth.pjt.dto.request.policy.PolicyQuestionRequest;
+import com.aiyouth.pjt.dto.response.PlanningResponse.Session;
 import com.aiyouth.pjt.dto.response.policy.Evidence;
 import com.aiyouth.pjt.dto.response.policy.PolicyAnswerResponse;
 import com.aiyouth.pjt.dto.response.policy.PolicyAnswerResponse.HelpLink;
-import com.aiyouth.pjt.global.revision.Revisions;
 import com.aiyouth.pjt.llm.assistant.RagServiceClient;
 import com.aiyouth.pjt.llm.assistant.RagServiceClient.RagAnswer;
 import com.aiyouth.pjt.llm.assistant.RagServiceClient.RagQuestion;
@@ -22,8 +22,7 @@ import com.aiyouth.pjt.model.Policy;
 import com.aiyouth.pjt.model.RagChunk;
 import com.aiyouth.pjt.model.enums.AnswerSource;
 import com.aiyouth.pjt.model.enums.AnswerStatus;
-import com.aiyouth.pjt.service.planning.PlanningContext;
-import com.aiyouth.pjt.service.planning.PlanningContextReader;
+import com.aiyouth.pjt.service.PlanningSessions;
 
 /**
  * API 6 공고문 질문.
@@ -32,6 +31,7 @@ import com.aiyouth.pjt.service.planning.PlanningContextReader;
  *   <li>숫자가 근거에 없으면 AI 문장 대신 원문 발췌(SOURCE_EXCERPT)로 답한다.</li>
  *   <li>Python을 쓸 수 없으면 키워드로 찾은 원문 발췌를 FALLBACK으로 보여주고, 그마저 없으면 근거 없음을 알린다.</li>
  * </ol>
+ * 세션 소유권(작업 쿠키)·만료·입력 버전은 {@link PlanningSessions#getForInput}이 확인한다.
  * 등록된 시연 대체 답변(PREPARED_ANSWER)은 승인된 질문·답변 문안이 준비되면 추가한다.
  */
 @Service
@@ -42,22 +42,21 @@ public class PolicyQuestionService {
     static final String MSG_FALLBACK_EXCERPT = "AI 답변 서버에 연결하지 못해 관련 공고문 원문을 보여드려요. 아래 근거에서 직접 확인해 주세요.";
     static final String MSG_FALLBACK_EMPTY = "AI 답변 서버에 연결하지 못했고, 관련 공고문 원문도 찾지 못했어요. 잠시 후 다시 시도하거나 담당 기관에 문의해 주세요.";
 
-    private final PlanningContextReader reader;
+    private final PlanningSessions sessions;
     private final RagServiceClient rag;
     private final SourceExcerptRetriever retriever;
     private final PolicyMapper policyMapper;
 
-    public PolicyQuestionService(PlanningContextReader reader, RagServiceClient rag, SourceExcerptRetriever retriever,
+    public PolicyQuestionService(PlanningSessions sessions, RagServiceClient rag, SourceExcerptRetriever retriever,
                                  PolicyMapper policyMapper) {
-        this.reader = reader;
+        this.sessions = sessions;
         this.rag = rag;
         this.retriever = retriever;
         this.policyMapper = policyMapper;
     }
 
-    public PolicyAnswerResponse ask(UUID sessionId, PolicyQuestionRequest request) {
-        PlanningContext ctx = reader.load(sessionId);
-        Revisions.requireCurrentInput(request.inputRevision(), ctx.revision());
+    public PolicyAnswerResponse ask(UUID sessionId, String token, PolicyQuestionRequest request) {
+        Session ctx = sessions.getForInput(sessionId, token, request.inputRevision());
         String question = request.question().strip();
         String policyKey = request.policyKey() == null || request.policyKey().isBlank() ? null : request.policyKey();
         List<HelpLink> policyLinks = policyLinks(policyKey);
@@ -74,7 +73,7 @@ public class PolicyQuestionService {
                 policyLinks);
     }
 
-    private PolicyAnswerResponse fromAi(PlanningContext ctx, RagAnswer ai, List<HelpLink> policyLinks) {
+    private PolicyAnswerResponse fromAi(Session ctx, RagAnswer ai, List<HelpLink> policyLinks) {
         List<HelpLink> links = new ArrayList<>(policyLinks);
         if (ai.helpLinks() != null) {
             ai.helpLinks().stream().filter(l -> l.url() != null).forEach(l -> links.add(new HelpLink(l.label(), l.url())));
@@ -114,7 +113,7 @@ public class PolicyQuestionService {
         }
     }
 
-    private static PolicyAnswerResponse answer(PlanningContext ctx, AnswerStatus status, String text,
+    private static PolicyAnswerResponse answer(Session ctx, AnswerStatus status, String text,
                                                AnswerSource source, List<RagChunk> chunks, List<HelpLink> links) {
         return new PolicyAnswerResponse(status, text, source, chunks.stream().map(Evidence::from).toList(), links,
                 ctx.revision(), ctx.assessmentDate());

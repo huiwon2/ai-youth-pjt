@@ -6,7 +6,10 @@ import com.aiyouth.pjt.dto.response.policy.PolicyEvaluationResponse.Conflict;
 import com.aiyouth.pjt.dto.response.policy.PolicyEvaluationResponse.PolicyItem;
 import com.aiyouth.pjt.model.enums.TotalStatus;
 
-/** resources/demo/demo-fixture.json 구조. 승인된 시연 값만 담는다. */
+/**
+ * resources/demo/demo-fixture.json 구조. 승인된 시연 값 중 지원 판정·점수만 담는다.
+ * 시연 경로(30분·도보 13분·30분)는 백엔드 1의 DemoPlaces가 ComparisonInputs로 공급한다.
+ */
 public record DemoFixture(String version, String source, List<String> notes, Condition condition,
                           List<Evaluation> evaluations, Comparison comparison) {
 
@@ -20,7 +23,6 @@ public record DemoFixture(String version, String source, List<String> notes, Con
     public record Comparison(String scoredPreset, long monthlySupportWon, String supportPolicyKey, List<Home> homes) {
     }
 
-    public record Home(int slot, long monthlyRentWon, Long maintenanceWon, String routeMode, int durationSeconds,
-                       Integer totalScore, Integer rank) {
+    public record Home(int slot, long monthlyRentWon, Long maintenanceWon, Integer totalScore, Integer rank) {
     }
 }

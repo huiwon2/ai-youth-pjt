@@ -7,26 +7,24 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.aiyouth.pjt.calculator.KoreanText;
+import com.aiyouth.pjt.dto.response.PlanningResponse.Session;
 import com.aiyouth.pjt.dto.response.comparison.ComparisonAnswerResponse;
 import com.aiyouth.pjt.dto.response.comparison.ComparisonAnswerResponse.Reference;
 import com.aiyouth.pjt.dto.response.comparison.ComparisonResponse;
 import com.aiyouth.pjt.dto.response.comparison.ComparisonResponse.ComparisonHome;
 import com.aiyouth.pjt.global.exception.ApiException;
-import com.aiyouth.pjt.global.exception.ErrorCode;
-import com.aiyouth.pjt.global.revision.Revisions;
 import com.aiyouth.pjt.model.ComparisonRun;
 import com.aiyouth.pjt.model.enums.AnswerSource;
 import com.aiyouth.pjt.model.enums.AnswerStatus;
-import com.aiyouth.pjt.service.planning.PlanningContext;
-import com.aiyouth.pjt.service.planning.PlanningContextReader;
+import com.aiyouth.pjt.service.PlanningSessions;
 
 import tools.jackson.databind.json.JsonMapper;
 
 /**
  * API 12 비교 후속 질문. 저장된 비교 결과의 필드와 단위로만 답한다 (answerSource = RULE).
+ * 세션 소유권(작업 쿠키)·만료·입력 버전은 {@link PlanningSessions#getForInput}이 확인한다.
  * AI 설명을 붙이더라도 숫자·결론이 이 결과와 다르면 이 코드 답변을 쓴다.
  */
 @Service
@@ -39,24 +37,24 @@ public class ComparisonQuestionService {
     private static final Set<String> GENERIC_LABEL_WORDS = Set.of("원룸", "투룸", "쓰리룸", "오피스텔", "아파트", "빌라",
             "주택", "집", "후보");
 
-    private final PlanningContextReader reader;
+    private final PlanningSessions sessions;
     private final ComparisonService comparisonService;
     private final JsonMapper json;
 
-    public ComparisonQuestionService(PlanningContextReader reader, ComparisonService comparisonService,
+    public ComparisonQuestionService(PlanningSessions sessions, ComparisonService comparisonService,
                                      JsonMapper json) {
-        this.reader = reader;
+        this.sessions = sessions;
         this.comparisonService = comparisonService;
         this.json = json;
     }
 
-    @Transactional(readOnly = true)
-    public ComparisonAnswerResponse ask(UUID sessionId, UUID comparisonId, int inputRevision, String question) {
-        PlanningContext ctx = reader.load(sessionId);
-        Revisions.requireCurrentInput(inputRevision, ctx.revision());
+    public ComparisonAnswerResponse ask(UUID sessionId, String token, UUID comparisonId, int inputRevision,
+                                        String question) {
+        Session session = sessions.getForInput(sessionId, token, inputRevision);
         ComparisonRun run = comparisonService.requireRun(sessionId, comparisonId);
-        if (!comparisonService.isCurrent(run, ctx)) {
-            throw new ApiException(ErrorCode.STALE_COMPARISON, "입력이 바뀌어 이 비교 결과가 오래됐어요. 다시 비교해 주세요.");
+        if (!comparisonService.isCurrent(run, session.revision(), session.assessmentDate())) {
+            throw new ApiException(409, "STALE_COMPARISON", "입력이 바뀌어 이 비교 결과가 오래됐어요. 다시 비교해 주세요.",
+                    false);
         }
         ComparisonResponse comparison = json.readValue(run.getResultSnapshot(), ComparisonResponse.class);
         return answer(comparison, question.strip());
@@ -104,7 +102,7 @@ public class ComparisonQuestionService {
                         + KoreanText.won(Math.abs(diff)) + " 적게 들어요.");
             }
         }
-        if (a.route().hasDuration() && b.route().hasDuration()) {
+        if (ComparisonService.hasDuration(a.route()) && ComparisonService.hasDuration(b.route())) {
             refs.add(new Reference(a.homeId(), "route.durationSeconds", a.route().durationSeconds()));
             refs.add(new Reference(b.homeId(), "route.durationSeconds", b.route().durationSeconds()));
             int diff = KoreanText.minutes(a.route().durationSeconds()) - KoreanText.minutes(b.route().durationSeconds());
@@ -125,7 +123,7 @@ public class ComparisonQuestionService {
         StringBuilder text = new StringBuilder(KoreanText.topic(h.label())).append(" 한 달 ")
                 .append(KoreanText.won(h.cost().monthlyHousingCostWon()));
         text.append(h.cost().excludedUnknownMaintenance() ? "(관리비 별도)이에요." : "이에요.");
-        if (h.route().hasDuration()) {
+        if (ComparisonService.hasDuration(h.route())) {
             refs.add(new Reference(h.homeId(), "route.durationSeconds", h.route().durationSeconds()));
             text.append(" 편도 ").append(KoreanText.minutes(h.route().durationSeconds())).append("분 걸려요.");
         }
@@ -177,15 +175,29 @@ public class ComparisonQuestionService {
         return hits.stream().sorted((x, y) -> Integer.compare(x.index(), y.index())).map(Hit::home).toList();
     }
 
-    private static List<String> labelTokens(String label) {
+    /** 동 이름 뒤 번지·가 표기: 성수동2가 → 성수동, 역삼동 → 역삼동 */
+    private static final java.util.regex.Pattern DONG = java.util.regex.Pattern.compile("^(\\p{L}{2,}?)동(\\d+가)?$");
+
+    /**
+     * 라벨에서 질문과 맞춰 볼 이름을 뽑는다. 라벨이 주소("서울 성동구 성수동2가 333-76")여도
+     * 동 이름(성수동·성수)을 찾는다. 시·구·번지와 원룸 같은 일반어는 집을 구별하지 못하므로 뺀다.
+     */
+    static List<String> labelTokens(String label) {
         List<String> tokens = new ArrayList<>();
         for (String word : label.split("\\s+")) {
-            if (word.length() < 2 || GENERIC_LABEL_WORDS.contains(word)) {
+            if (word.length() < 2 || GENERIC_LABEL_WORDS.contains(word) || word.chars().anyMatch(Character::isDigit)
+                    && !DONG.matcher(word).matches()) {
                 continue;
             }
-            tokens.add(word);
-            if (word.length() >= 3 && (word.endsWith("동") || word.endsWith("구"))) {
-                tokens.add(word.substring(0, word.length() - 1));
+            if (word.endsWith("시") || word.endsWith("구") || word.equals("서울")) {
+                continue;
+            }
+            java.util.regex.Matcher dong = DONG.matcher(word);
+            if (dong.matches()) {
+                tokens.add(dong.group(1) + "동");
+                tokens.add(dong.group(1));
+            } else {
+                tokens.add(word);
             }
         }
         return tokens;
