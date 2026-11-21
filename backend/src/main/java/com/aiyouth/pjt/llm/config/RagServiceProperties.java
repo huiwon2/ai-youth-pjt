@@ -5,7 +5,7 @@ import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Python RAG 서비스 연결 설정 (프롬프트·임베딩·검색·LLM 호출은 Python 쪽).
+ * Node.js RAG 서비스 연결 설정 (프롬프트·임베딩·검색·LLM 호출은 Node.js 쪽).
  *
  * @param enabled  false면 호출하지 않고 DB 원문 발췌로 대체한다
  * @param baseUrl  예: http://localhost:8000

@@ -15,10 +15,10 @@ function selected<T extends Record<string, string>>(options: T, value: string): 
 }
 
 function Select({ label, value, options, onChange }: { label: string; value: string; options: Record<string, string>; onChange: (value: string) => void }) {
-  return <select aria-label={label} value={value} onChange={event => onChange(event.target.value)}>
-    <option value="">선택해 주세요</option>
-    {Object.entries(options).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
-  </select>
+  return <div className="choice-chips" role="group" aria-label={label}>
+    {Object.entries(options).map(([key, text]) => <button className="secondary" key={key} type="button"
+      aria-pressed={value === key} onClick={() => onChange(key === value ? '' : key)}>{text}</button>)}
+  </div>
 }
 
 export default function ProfilePage({ session, easy, onSave, onError }: {
@@ -43,6 +43,11 @@ export default function ProfilePage({ session, easy, onSave, onError }: {
   const moveIn = selected(moving, move)
   const birthdayValue = birthday === '' ? null : birthday === 'true'
   const age = birthYear === profile.birthYear && birthdayValue === profile.birthdayPassedThisYear ? profile.age : null
+
+  function changeYear(delta: number) {
+    const next = birthYear === null ? year - 27 : birthYear + delta
+    update({ birth: String(Math.max(1000, Math.min(year, next))), birthday: '', birthdayEdited: false })
+  }
 
   async function search() {
     if (!query.trim() || searching) return
@@ -105,9 +110,11 @@ export default function ProfilePage({ session, easy, onSave, onError }: {
 
   const fields: { label: string; summary: string; control: ReactNode }[] = [
     { label: '출생연도', summary: birthYear ? birth + '년' : '', control: <>
+      <div className="year-control"><button type="button" className="secondary" aria-label="출생연도 1년 줄이기" onClick={() => changeYear(-1)}>−</button>
       <input aria-label="출생연도" inputMode="numeric" maxLength={4} placeholder="예: 1999" value={birth} onChange={event => {
         update({ birth: event.target.value, birthday: '', birthdayEdited: false })
       }} />
+        <button type="button" className="secondary" aria-label="출생연도 1년 늘리기" onClick={() => changeYear(1)}>+</button></div>
       {birth && birthYear === null && <small className="error">판정 기준 연도({year}년) 이하인 네 자리 연도를 입력해 주세요.</small>}
       {!easy && birthYear !== null && birthdayControl()}
       {age && <small>{age.exactYears === null ? '만 ' + age.minYears + '~' + age.maxYears + '세' : '만 ' + age.exactYears + '세'}</small>}
@@ -117,6 +124,7 @@ export default function ProfilePage({ session, easy, onSave, onError }: {
     { label: '부모님과 주민등록 주소가 같나요?', summary: parent ? parents[parent] : '', control: <Select label="부모님과 주민등록 주소가 같나요?" value={parent} options={parents} onChange={value => update({ parent: selected(parents, value) ?? '' })} /> },
     { label: '보증금으로 쓸 돈', summary: cashWon === null ? '' : number.format(cashWon / 10000) + '만 원', control: <>
       <div className="input-row"><input aria-label="보증금으로 쓸 돈 (만 원)" inputMode="decimal" placeholder="예: 2000" value={cash} onChange={event => update({ cash: event.target.value })} /><span>만 원</span></div>
+      <div className="amount-chips">{[100, 500, 1000, 5000].map(amount => <button type="button" className="secondary" key={amount} onClick={() => update({ cash: String((won(cash) ?? 0) / 10000 + amount) })}>+{number.format(amount)}만</button>)}<button className="secondary" type="button" onClick={() => update({ cash: '' })}>지우기</button></div>
       {cash && cashWon === null && <small className="error">0 이상의 금액을 만 원 단위로 입력해 주세요. 소수점은 4자리까지 입력할 수 있어요.</small>}
     </> },
     { label: '수입', summary: incomeWon === null ? '' : (period === 'MONTHLY' ? '월 ' : '연 ') + number.format(incomeWon / 10000) + '만 원', control: <>
@@ -124,6 +132,7 @@ export default function ProfilePage({ session, easy, onSave, onError }: {
         <select aria-label="수입 기준" value={period} onChange={event => update({ period: event.target.value === 'ANNUAL' ? 'ANNUAL' : 'MONTHLY' })}><option value="MONTHLY">월 소득</option><option value="ANNUAL">연 소득</option></select>
         <input aria-label="수입 (만 원)" inputMode="decimal" placeholder="예: 230" value={income} onChange={event => update({ income: event.target.value })} /><span>만 원</span>
       </div>
+      <div className="amount-chips">{(period === 'MONTHLY' ? [10, 50, 100] : [100, 500, 1000]).map(amount => <button type="button" className="secondary" key={amount} onClick={() => update({ income: String((won(income) ?? 0) / 10000 + amount) })}>+{number.format(amount)}만</button>)}<button className="secondary" type="button" onClick={() => update({ income: '' })}>지우기</button></div>
       {income && incomeWon === null && <small className="error">0 이상의 금액을 만 원 단위로 입력해 주세요. 소수점은 4자리까지 입력할 수 있어요.</small>}
     </> },
     { label: '자주 가는 곳', summary: destination?.name ?? '', control: <>
@@ -144,6 +153,9 @@ export default function ProfilePage({ session, easy, onSave, onError }: {
     </> },
     { label: '허용 이동 시간', summary: commuteLimit?.type === 'NO_LIMIT' ? '제한 없음' : commuteLimit ? commuteLimit.minutes + '분' : '', control: <>
       <div className="input-row"><input aria-label="허용 이동 시간 (분)" inputMode="numeric" disabled={unlimited} placeholder="예: 45" value={commute} onChange={event => update({ commute: event.target.value })} /><span>분</span></div>
+      <input className="commute-slider" type="range" aria-label="허용 이동 시간 조절" min="10" max="90" step="5"
+        disabled={unlimited} value={Math.max(10, Math.min(90, Number(commute) || 45))}
+        onChange={event => update({ commute: event.target.value })} />
       <label className="check"><input type="checkbox" checked={unlimited} onChange={event => update({ unlimited: event.target.checked })} /> 제한 없음</label>
       {commute && !commuteLimit && <small className="error">이동 시간을 0 이상의 정수로 입력해 주세요.</small>}
     </> },
@@ -159,17 +171,17 @@ export default function ProfilePage({ session, easy, onSave, onError }: {
   const questionLabel = step === 1 ? '올해 생일이 지났나요?' : questions[step > 1 ? step - 1 : step]
 
   function birthdayControl() {
-    return <label className="nested">올해 생일
+    return <div className="nested">올해 생일
       <Select label="올해 생일" value={birthday} options={{ true: '오늘 또는 이미 지났어요', false: '아직 안 지났어요' }} onChange={value => { update({ birthday: value, birthdayEdited: true }) }} />
-    </label>
+    </div>
   }
 
   function fieldCard(field: typeof fields[number]) {
-    return <fieldset className="field" key={field.label}><legend aria-live={easy ? "polite" : undefined}>{field.label}</legend>{field.control}</fieldset>
+    return <fieldset className="field" key={field.label}><legend aria-live={easy ? "polite" : undefined}>{field.label}</legend><div className="field-control">{field.control}</div></fieldset>
   }
 
   return <>
-    <div className="page-title"><h1>내 조건</h1><p>주거 지원을 확인할 수 있도록 아홉 가지 조건을 알려주세요.</p></div>
+    <div className="page-title"><h1>내 상황을 알려 주세요</h1><p>주거 지원을 확인할 수 있도록 아홉 가지 조건을 알려주세요.</p></div>
     <form className="profile-layout" onSubmit={save}>
       <div className="panel form-panel" key={easy ? 'easy' : 'standard'}>
         <fieldset className="form-fields" disabled={saving}>

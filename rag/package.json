@@ -4,8 +4,11 @@
   "private": true,
   "type": "module",
   "description": "Local Korean policy RAG with OpenAI embeddings and SQLite",
-  "engines": { "node": ">=24" },
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
+    "start": "node --env-file-if-exists=.env src/server.mjs",
     "inspect": "node src/cli.mjs inspect",
     "index": "node src/cli.mjs index",
     "search": "node src/cli.mjs search",
@@ -14,5 +17,8 @@
     "verify:grounding": "node scripts/verify-grounding.mjs",
     "evaluate": "node scripts/evaluate.mjs",
     "test": "node --test"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
   }
 }

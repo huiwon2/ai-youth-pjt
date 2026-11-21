@@ -115,7 +115,7 @@ export default function SupportPage({ session, easy, onError }: {
     }}>다시 불러오기</button>
   </section>
 
-  if (!result) return <section className="panel"><h1>받을 지원</h1><p role="status">내 조건으로 지원 결과를 확인하고 있어요…</p></section>
+  if (!result) return <section className="panel loading-card" role="status"><span className="loading-house" aria-hidden="true">⌂</span><h1>내 조건으로 받을 수 있는 지원을 찾고 있어요</h1><progress aria-label="지원 조회 중" /></section>
 
   const { summary, policies } = result
   const mode = easy ? '?mode=easy' : ''
@@ -153,7 +153,7 @@ export default function SupportPage({ session, easy, onError }: {
         {item.title}{item.startDate && ' · ' + item.startDate}{item.endDate && ' ~ ' + item.endDate}
       </li>)}</ul>
     </section>}
-    <section className="panel scenario">
+    <section className="panel scenario ask-panel">
       <h2>공고문에 물어보기</h2>
       <form onSubmit={async event => {
         event.preventDefault()
@@ -195,6 +195,7 @@ export default function SupportPage({ session, easy, onError }: {
   </>
   return <>
     <div className="page-title"><h1>받을 지원</h1><p>내 조건과 공고 기준을 비교한 결과예요.</p></div>
+    <div className="support-layout"><div>
     <section className="result-banner">
       <p>{summary.targetYear}년 예상 지원 금액 {result.calculationVersion.startsWith('demo:') && <span className="tag">시연 예시</span>}</p>
       <strong>{money(summary.potentialTotalWon)}</strong>
@@ -206,7 +207,7 @@ export default function SupportPage({ session, easy, onError }: {
       <Link className="button secondary" to={'/profile' + mode}>내 조건 고치기</Link>
       <button type="button" className="secondary" onClick={() => void openScenario()}>35살이 되면?</button>
     </div>
-    {selection}
     {details}
+    </div><aside className="saved-aside">{selection}</aside></div>
   </>
 }

@@ -15,7 +15,7 @@ import org.springframework.web.client.RestClientException;
 import com.aiyouth.pjt.llm.config.RagServiceProperties;
 
 /**
- * Python RAG 서비스 호출. 계약은 backend/docs/rag-service-contract.md.
+ * Node.js RAG 서비스 호출. 계약은 backend/docs/rag-service-contract.md.
  * 연결 실패·시간 초과·5xx·형식 오류는 모두 Optional.empty()로 돌려 호출부가 원문 발췌로 대체하게 한다.
  */
 @Component
@@ -53,14 +53,14 @@ public class RagServiceClient {
         }
     }
 
-    /** Java → Python 요청. 질문 원문과 선택 정책만 보낸다 (사용자 프로필은 보내지 않는다). */
+    /** Java → RAG 요청. 질문 원문과 선택 정책만 보낸다 (사용자 프로필은 보내지 않는다). */
     public record RagQuestion(String question, String policyKey, LocalDate assessmentDate) {
     }
 
     /**
-     * Python → Java 응답.
+     * RAG → Java 응답.
      *
-     * @param status      ANSWERED / NO_EVIDENCE / OUT_OF_SCOPE
+     * @param status      ANSWERED / EXCERPT / NO_EVIDENCE / OUT_OF_SCOPE
      * @param evidenceIds 답변에 쓴 rag_chunks.id. Java가 DB에서 VERIFIED 여부를 다시 확인한다
      */
     public record RagAnswer(String status, String answer, List<String> evidenceIds, List<HelpLink> helpLinks) {

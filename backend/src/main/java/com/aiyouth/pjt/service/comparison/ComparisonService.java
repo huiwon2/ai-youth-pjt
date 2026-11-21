@@ -45,7 +45,7 @@ import tools.jackson.databind.json.JsonMapper;
  *       외부 경로 조회가 길어도 세션 행을 잠그지 않기 위해서다.</li>
  *   <li>저장은 {@link ComparisonRunWriter}가 별도 트랜잭션에서 소유권·revision을 다시 확인한 뒤 한다.</li>
  *   <li>입력과 조회 결과로 보증금 부족분·월 주거비·참고 교통비를 계산한다.</li>
- *   <li>지원 판정 규칙과 점수 환산식이 확정될 때까지 지원 적용 비용·점수·순위를 null로 반환한다.</li>
+ *   <li>추천 서비스의 점수·순위를 함께 저장한다. 집별 지원 판정 규칙이 확정되기 전에는 지원 적용 비용을 보류한다.</li>
  * </ul>
  * 이 클래스에는 트랜잭션을 걸지 않는다 (ComparisonInputs.load는 트랜잭션 안에서 호출할 수 없다).
  */
@@ -57,14 +57,16 @@ public class ComparisonService {
     private final ComparisonRunWriter writer;
     private final ComparisonRunMapper runMapper;
     private final JsonMapper json;
+    private final RankingClient ranking;
 
     public ComparisonService(ComparisonInputs inputs, PlanningSessions sessions, ComparisonRunWriter writer,
-                             ComparisonRunMapper runMapper, JsonMapper json) {
+                             ComparisonRunMapper runMapper, JsonMapper json, RankingClient ranking) {
         this.inputs = inputs;
         this.sessions = sessions;
         this.writer = writer;
         this.runMapper = runMapper;
         this.json = json;
+        this.ranking = ranking;
     }
 
     public ComparisonResponse create(UUID sessionId, String token, int inputRevision) {
@@ -89,11 +91,12 @@ public class ComparisonService {
                     candidate.facilities(), List.of(), Scores.pending(), null));
             addHomeWarnings(warnings, homes.size() - 1, home, route, candidate);
         }
+        homes = ranking.rank(snapshot, homes, warnings);
         addComparisonWarnings(warnings, homes);
 
         Recommendation recommendation = recommend(homes);
         ComparisonStatus status = ComparisonStatus.PARTIAL;
-        String version = PolicyEvaluationService.RULES_VERSION;
+        String version = calculationVersion();
         UUID comparisonId = UUID.randomUUID();
         ComparisonResponse response = new ComparisonResponse(comparisonId, snapshot.inputRevision(),
                 snapshot.assessmentDate(), version, status, true, preset, snapshot.preferences().weights(), homes,
@@ -135,8 +138,12 @@ public class ComparisonService {
     /** 입력과 계산 버전이 같고 실제 공급원의 경로를 사용한 결과만 현재 결과로 본다. */
     boolean isCurrent(ComparisonRun run, ComparisonResponse stored, int revision, LocalDate assessmentDate) {
         return run.getInputRevision() == revision && run.getAssessmentDate().equals(assessmentDate)
-                && PolicyEvaluationService.RULES_VERSION.equals(run.getCalculationVersion())
+                && calculationVersion().equals(run.getCalculationVersion())
                 && stored.homes().stream().allMatch(home -> home.route() == null || home.route().hasLiveSource());
+    }
+
+    private static String calculationVersion() {
+        return PolicyEvaluationService.RULES_VERSION + "/" + RankingClient.VERSION;
     }
 
     static boolean hasDuration(Route route) {
@@ -173,8 +180,6 @@ public class ComparisonService {
             warnings.add(new Warning("ALL_MAINTENANCE_UNKNOWN", null,
                     "모든 후보의 관리비를 몰라 추천을 보류했어요. 관리비를 알아본 뒤 입력해 주세요."));
         }
-        warnings.add(new Warning("SCORE_FORMULA_PENDING", "homes[].scores",
-                "점수 환산식이 확정되지 않아 점수와 순위를 보류했어요. 비용과 이동 시간 차이를 비교해 주세요."));
         warnings.add(new Warning("POLICY_RULES_PENDING", "homes[].policyResults",
                 "집별 지원 판정 규칙이 확정되지 않아 지원 적용 비용을 계산하지 않았어요."));
     }

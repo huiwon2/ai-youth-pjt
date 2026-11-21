@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import CandidateMap from '../components/map/CandidateMap'
 import { Link, useNavigate } from 'react-router'
 import { api } from '../api/firsthome'
 import { ApiError, errorMessage } from '../api/errors'
@@ -72,8 +73,9 @@ export default function ComparePage({ session, mode, onSave, onError }: Props) {
   const visibleSlots = easy ? slots.filter(position => homes.some(home => home.slot === position) || position === nextSlot) : slots
 
   return <>
-    <div className="page-title"><h1>{easy ? '비교할 집을 넣어 주세요' : '집 고르기'}</h1><p>후보 집 2~3곳의 주거비와 {session.profile.frequentPlace?.name}까지의 이동시간을 비교해 보세요.</p></div>
+    <div className="page-title"><h1>{easy ? '비교할 집을 넣어 주세요' : '비교할 후보 집을 넣어 주세요'}</h1><p>후보 집 2~3곳의 주거비와 {session.profile.frequentPlace?.name}까지의 이동시간을 비교해 보세요.</p></div>
     {easy && <p className="easy-instruction">{slot ? '주소를 검색하고 집을 고른 뒤 보증금과 월세를 적어 주세요.' : homes.length < 2 ? '비교하려면 집이 두 곳 필요해요. 후보 추가를 눌러 시작하세요.' : '아래의 비교하기를 눌러 어느 집이 맞을지 살펴보세요.'}</p>}
+    <CandidateMap homes={homes} destination={session.profile.frequentPlace} slot={slot} preview={preview} />
     <div className="candidate-grid" hidden={easy && slot !== null}>{visibleSlots.map(position => {
       const home = homes.find(item => item.slot === position)
       return <section className="panel candidate" key={position}>

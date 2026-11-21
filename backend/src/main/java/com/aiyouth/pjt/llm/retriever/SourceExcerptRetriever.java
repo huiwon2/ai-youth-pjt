@@ -13,8 +13,8 @@ import com.aiyouth.pjt.mapper.RagChunkMapper;
 import com.aiyouth.pjt.model.RagChunk;
 
 /**
- * 검증된 공고문 문단 조회. 의미 검색은 Python 서비스가 하고, 여기서는
- * (1) Python이 돌려준 근거 ID의 검증 여부 확인, (2) Python을 쓸 수 없을 때 키워드 원문 발췌만 한다.
+ * 검증된 공고문 문단 조회. 의미 검색은 RAG 서비스가 하고, 여기서는
+ * (1) RAG가 돌려준 근거 ID의 검증 여부 확인, (2) RAG를 쓸 수 없을 때 키워드 원문 발췌만 한다.
  */
 @Component
 public class SourceExcerptRetriever {
@@ -42,7 +42,7 @@ public class SourceExcerptRetriever {
             try {
                 uuids.add(UUID.fromString(id));
             } catch (IllegalArgumentException ignored) {
-                // Python이 잘못된 ID를 보내면 근거로 인정하지 않는다
+                // RAG가 잘못된 ID를 보내면 근거로 인정하지 않는다
             }
         }
         return uuids.isEmpty() ? List.of() : mapper.findVerifiedByIds(uuids);

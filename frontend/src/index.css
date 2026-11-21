@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap');
-
 :root {
   font-family: "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
   color: #172d26;
@@ -30,25 +28,7 @@ main.frame { padding-bottom: 64px; }
 .brand { display: flex; align-items: center; gap: 9px; text-decoration: none; font-size: 1.2rem; font-weight: 800; }
 .brand-icon { background: var(--green); color: white; padding: 0 8px 4px; border-radius: 8px; font-size: 1.55rem; line-height: 1.15; }
 .text-link { font-weight: 700; text-underline-offset: .25em; }
-.hero {
-  margin-top: clamp(36px, 9vh, 108px); background: #e9f0e6; border: 1px solid #dfe9da;
-  border-radius: 28px; display: grid; grid-template-columns: 1.4fr 1fr; align-items: center;
-  padding: clamp(26px, 6vw, 74px); gap: 36px; overflow: hidden;
-}
-.eyebrow { font-weight: 700; color: var(--green); margin-bottom: 16px; }
-.hero h1 { font-size: clamp(2.15rem, 5.6vw, 4.3rem); line-height: 1.14; letter-spacing: -.065em; }
-.intro { color: var(--muted); margin-top: 22px; line-height: 1.75; }
 .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-block: 22px 16px; }
-.hero-art { position: relative; width: min(100%, 310px); aspect-ratio: 1; margin-inline: auto; background: #d9e8d7; border-radius: 50%; }
-.house { position: absolute; inset: 46% 25% 19%; background: #fff9ef; border-radius: 3px 3px 10px 10px; z-index: 1; }
-.house::before { content: ''; position: absolute; width: 122%; left: -11%; bottom: 97%; height: 74%; background: #23654e; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
-.house::after { content: ''; position: absolute; width: 22%; height: 27%; top: 25%; right: 14%; background: #87ac92; border: 3px solid #d9e8d7; border-radius: 3px; }
-.door { position: absolute; left: 20%; bottom: 0; height: 61%; width: 26%; border-radius: 16px 16px 0 0; background: #e4a256; }
-.sun { position: absolute; border-radius: 50%; inset: 14% 16% auto auto; width: 16%; aspect-ratio: 1; background: #f2bc68; }
-.ground { position: absolute; inset: auto 12% 18%; height: 3px; border-radius: 4px; background: #94b197; }
-.steps { display: flex; align-items: center; gap: 12px; margin-block: 28px; }
-.steps a { text-decoration: none; padding: 6px 12px; border-radius: 999px; }
-.steps a[aria-current] { background: #dcece2; font-weight: 800; }
 .page-title { margin-bottom: 24px; }
 .page-title h1 { font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -.05em; }
 .page-title p, .muted, small { color: var(--muted); }
