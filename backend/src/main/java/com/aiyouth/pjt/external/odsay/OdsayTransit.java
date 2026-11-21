@@ -128,7 +128,7 @@ public class OdsayTransit {
         if (node.isIntegralNumber() && node.canConvertToInt()) {
             return node.asInt();
         }
-        if (node.isTextual()) {
+        if (node.isString()) {
             try {
                 return Integer.valueOf(node.asString());
             } catch (NumberFormatException ignored) {

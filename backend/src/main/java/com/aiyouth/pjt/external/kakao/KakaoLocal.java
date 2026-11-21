@@ -77,7 +77,7 @@ public class KakaoLocal {
         Location location = place.location();
         int distance = GeoDistance.straightLineMeters(center, location);
         JsonNode reported = document.path("distance");
-        if (reported.isTextual() && reported.asString().matches("[0-9]{1,4}")) {
+        if (reported.isString() && reported.asString().matches("[0-9]{1,4}")) {
             distance = Integer.parseInt(reported.asString());
         }
         if (distance > SEARCH_RADIUS) {

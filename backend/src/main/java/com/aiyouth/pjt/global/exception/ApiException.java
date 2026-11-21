@@ -21,6 +21,10 @@ public final class ApiException extends RuntimeException {
                 List.of(new FieldError(field, code)));
     }
 
+    public static ApiException withFields(int status, String code, String message, List<FieldError> fields) {
+        return new ApiException(status, code, message, false, List.copyOf(fields));
+    }
+
     public static ApiException missingDestination() {
         return new ApiException(422, "PROFILE_INCOMPLETE", "자주 가는 곳을 먼저 저장해 주세요.", false,
                 List.of(new FieldError("profile.frequentPlace", "REQUIRED")));
