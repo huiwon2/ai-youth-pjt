@@ -1,3 +1,4 @@
+import HomePage from './pages/HomePage'
 import { useEffect, useState } from 'react'
 import { BrowserRouter, Link, Navigate, Route, Routes, useParams, useLocation, useNavigate } from 'react-router'
 import { api, sessionKey } from './api/firsthome'
@@ -76,41 +77,32 @@ function FirstHome() {
   }
 
   const home = location.pathname === '/'
+  const chapters = [
+    { path: '/profile', title: '내 조건', detail: '내 상황과 예산' },
+    { path: '/support', title: '받을 지원', detail: '지원 금액과 신청 조건' },
+    { path: '/compare', title: '집 고르기', detail: '비용 · 시간 · 동네 비교' },
+  ]
+  const active = chapters.findIndex(item => location.pathname.startsWith(item.path))
+  const chapter = chapters[active]
   return (
     <>
-      <header className="topbar">
-        <div className="frame header-inner">
-          <Link className="brand" to={'/' + mode}><span className="brand-icon" aria-hidden="true">⌂</span> 첫집내비</Link>
-          {!home && <Link className="text-link" to={location.pathname + (easy ? '' : '?mode=easy')} replace>
-            {easy ? '일반 화면으로 보기' : '쉬운 화면으로 보기'}
-          </Link>}
-        </div>
-      </header>
-      <main className={easy ? "frame easy-view" : "frame"}>
-        {!home && <nav className="steps" aria-label="작업 단계">
-          <Link to={'/profile' + mode} aria-current={location.pathname === '/profile' ? 'step' : undefined}>내 조건</Link>
-          <span aria-hidden="true">→</span>
-          <Link to={'/support' + mode} aria-current={location.pathname === '/support' ? 'step' : undefined}>받을 지원</Link>
-          <span aria-hidden="true">→</span><Link to={'/compare' + mode} aria-current={location.pathname.startsWith('/compare') ? 'step' : undefined}>후보 집</Link>
+      <header className={'topbar' + (home ? ' landing-bar' : '')}><div className="frame header-inner">
+        <Link className="brand" to={'/' + mode}>첫집<b>내비</b></Link>
+        {!home && chapter && <span className="top-file">내 첫 집 파일 · 0{active + 1} {chapter.title}</span>}
+        <Link className="mode-switch" aria-label={easy ? '일반 화면으로 보기' : '쉬운 화면으로 보기'} to={location.pathname + (easy ? '' : '?mode=easy')} replace>쉬운 화면 <span className={easy ? 'sw on' : 'sw'} /></Link>
+        {home && <button className="start-small" disabled={starting || restoring} onClick={() => void start(easy)}>시작하기</button>}
+      </div></header>
+      <main className={home ? 'landing' : 'frame workspace' + (easy ? ' easy-view' : '')}>
+        {!home && <nav className="rail" aria-label="내 첫 집 파일 목차"><p>내 첫 집 파일</p>
+          {chapters.map((item, i) => <Link key={item.path} to={item.path + mode} aria-current={i === active ? 'step' : undefined}>
+            <span className="rail-no">0{i + 1}</span><span>{item.title}<small>{item.detail}</small></span>
+          </Link>)}
         </nav>}
+        <div className="chapter-content">
+        {!home && chapter && <div className="chapter-label"><b>0{active + 1}</b> {chapter.title}</div>}
         <Routes>
-          <Route path="/" element={<section className="hero">
-            <div>
-              <p className="eyebrow">첫 독립을 준비하는 청년을 위한 주거 안내</p>
-              <h1>첫 집을 구할 때,<br />내 조건부터.</h1>
-              <p className="intro">예산과 자주 가는 곳을 입력하고<br />내 조건에 맞는 주거 지원을 한곳에서 확인해 보세요.</p>
-              <div className="actions">
-                <button disabled={starting || restoring} onClick={() => void start(easy)}>{starting ? '작업을 여는 중…' : '내 파일 만들기'}</button>
-                <button className="secondary" disabled={starting || restoring} onClick={() => {
-                  if (session) navigate('/profile?mode=easy')
-                  else navigate(easy ? '/' : '/?mode=easy', { replace: true })
-                }}>{easy && !session ? '일반 화면으로 볼래요' : '쉬운 화면으로 볼래요'}</button>
-                {session && <Link className="text-link" to={'/profile' + mode}>이전 작업 이어가기</Link>}
-              </div>
-              {error && <p role="alert" className="error">{error}</p>}
-            </div>
-            <div className="hero-art" aria-hidden="true"><div className="house"><div className="door" /></div><div className="sun" /><div className="ground" /></div>
-          </section>} />
+          <Route path="/" element={<HomePage busy={starting || restoring} error={error || restoreError} resume={session ? '/profile' + mode : null}
+            start={() => void start(easy)} startEasy={() => session ? navigate('/profile?mode=easy') : void start(true)} />} />
           <Route path="/profile" element={restoring ? <p role="status">작업을 불러오는 중…</p> : restoreError ? restoreFailure() : session ?
             <ProfilePage key={session.sessionId + ':' + session.revision} session={session} easy={easy} onSave={value => {
               setSession(value)
@@ -121,7 +113,9 @@ function FirstHome() {
           <Route path="/compare/:comparisonId" element={guard(value => <ComparisonRoute session={value} mode={mode} onSave={saved => setSession(current => current?.sessionId === saved.sessionId && current.revision <= saved.revision ? saved : current)} />)} />
           <Route path="*" element={<Navigate to={'/' + mode} replace />} />
         </Routes>
+        </div>
       </main>
+      <footer className="file-footer"><div className="frame"><strong>첫집 내비</strong>처음 독립하는 서울 청년을 위한 주거 도우미</div></footer>
     </>
   )
 

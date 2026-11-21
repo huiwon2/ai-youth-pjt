@@ -124,7 +124,7 @@ export default function ComparisonActions({ session, result, comparisonId, mode,
       {priorityError && <p role="alert" className="error">{priorityError}</p>}
       {!current && !busy && !needsRefresh && <p>저장한 우선순위는 {labels[savedPreset]}예요. 우선순위를 선택하면 현재 조건으로 다시 비교해요.</p>}
     </section>
-    <section className="panel scenario">
+    <section className="panel scenario ask-panel">
       <h2>이 비교에 대해 물어보기</h2>
       {current ? <><form onSubmit={event => { event.preventDefault(); void ask(question) }}>
         <div className="input-row">

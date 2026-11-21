@@ -28,9 +28,10 @@ export default function ComparisonPage({ session, comparisonId, mode, onSave, in
   }, [comparisonId, session.sessionId, attempt])
   const winner = result?.homes.find(home => home.homeId === result.recommendation.homeId)
   return <div className="comparison-result">
-    <div className="page-title"><h1>후보 집 비교 결과</h1><p><Link to={'/compare' + mode}>후보 목록으로</Link></p></div>
+    <div className="page-title"><h1>{result ? `후보 집 ${result.homes.length}곳 비교` : '후보 집 비교 결과'}</h1><p><Link to={'/compare' + mode}>후보 목록으로</Link></p></div>
     {error ? <div role="alert">{error} <button onClick={() => { setError(''); setAttempt(value => value + 1) }}>다시 조회</button></div> : !result ? <p role="status">저장한 결과를 불러오는 중…</p> : <>
       {(!result.isCurrent || result.inputRevision !== session.revision) && <p className="panel">이전 조건으로 만든 결과예요. 현재 후보로 다시 비교하려면 후보 목록으로 돌아가세요.</p>}
+      <div className={mode ? '' : 'result-layout'}><div>
       {mode ? <EasyComparison result={result} /> : <>
       <section className="result-banner"><p>{result.calculationVersion.startsWith('demo:') ? '시연 예시' : '추천 결과'} · {result.assessmentDate}</p>
         <h2>{winner ? '추천 후보 · ' + winner.label : '추천 순위 보류'}</h2>
@@ -47,8 +48,8 @@ export default function ComparisonPage({ session, comparisonId, mode, onSave, in
       <ComparisonMap result={result} destination={result.destination === undefined
         ? (result.isCurrent && result.inputRevision === session.revision ? session.profile.frequentPlace : null)
         : result.destination} />
-      <ExportComparison result={result} session={session} />
       <ComparisonActions session={session} result={result} comparisonId={comparisonId} mode={mode} onSave={onSave} onRecalculated={onRecalculated} />
+      </div><aside className="saved-aside"><ExportComparison result={result} session={session} /></aside></div>
       {!mode && result.warnings.map((item, index) => <p key={index}>{item.message}</p>)}
     </>}
   </div>
