@@ -21,7 +21,6 @@ import com.aiyouth.pjt.model.enums.PriorityPreset;
 /**
  * API 10 응답 (Comparison). result_snapshot에 isCurrent=false로 저장하고, 조회 시 isCurrent만 다시 계산한다.
  * 위치·경로·시설·경고·가중치 타입은 백엔드 1의 PlanningResponse와 같은 것을 쓴다.
- * calculationVersion이 "demo:"로 시작하면 점수·집별 지원 예시는 승인된 시연 데이터다.
  */
 public record ComparisonResponse(
         UUID comparisonId,

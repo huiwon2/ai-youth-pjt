@@ -27,12 +27,8 @@ firsthome:
     ttl-days: ${FIRSTHOME_SESSION_TTL_DAYS:7}
     cookie-secure: ${FIRSTHOME_SESSION_COOKIE_SECURE:true}
   places:
-    demo: ${FIRSTHOME_DEMO_PLACES:false}
     kakao-key: ${KAKAO_REST_API_KEY:}
     odsay-key: ${ODSAY_WEB_KEY:}
-  demo:
-    # true면 승인된 시연 조건(만 27세·월 230만·보증금 2,000만·멀티캠퍼스)과 일치하는 입력에만 시연 판정·점수 사용
-    enabled: ${DEMO_MODE:false}
   rag:
     # 공고문 질문(API 6)의 Python RAG 서비스. 꺼져 있거나 응답이 없으면 DB 원문 발췌로 대체
     enabled: ${RAG_SERVICE_ENABLED:false}

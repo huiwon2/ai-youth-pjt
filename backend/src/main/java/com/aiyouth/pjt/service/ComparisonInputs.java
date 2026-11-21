@@ -57,13 +57,13 @@ public class ComparisonInputs {
 
     private HomeLookup currentLookup(ChosenLocation home, ChosenLocation destination, UUID destinationVersion,
                                      HomeRow row, HomeLookup saved, Instant now) {
-        if (saved == null || !fresh(saved.queriedAt(), now)) {
+        if (saved == null || !fresh(saved.queriedAt(), now) || !saved.route().hasLiveSource()) {
             return lookups.lookup(home, destination, now);
         }
         Route route = saved.route();
         boolean refreshRoute = !Objects.equals(destinationVersion, row.routeDestinationVersion())
                 || !fresh(route.queriedAt(), now) || route.status().equals("UNAVAILABLE");
-        boolean refreshFacilities = !"DEMO".equals(home.source()) && saved.facilities().stream()
+        boolean refreshFacilities = saved.facilities().stream()
                 .anyMatch(facility -> facility.status().equals("UNAVAILABLE"));
         return refreshRoute || refreshFacilities ? lookups.refresh(home, destination, saved, refreshRoute, now) : saved;
     }

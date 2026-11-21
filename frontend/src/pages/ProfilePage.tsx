@@ -1,12 +1,13 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
-import { api, demo } from '../api/firsthome'
-import { errorMessage } from '../api/errors'
+import { api } from '../api/firsthome'
+import { ApiError, errorMessage } from '../api/errors'
 import { useProfileDraft } from '../hooks/useProfileDraft'
 import { won } from '../utils/money'
 import type { LocationSearch, ProfilePatch, Session } from '../types/contracts'
 
 import { jobs, parents, moving } from '../utils/profileLabels'
 
+const destinationFieldIndex = 6
 const number = new Intl.NumberFormat('ko-KR')
 const equal = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
 
@@ -90,6 +91,12 @@ export default function ProfilePage({ session, easy, onSave, onError }: {
       onSave(result)
       if (!result.progress.canEvaluate) setError('서버에서 확인이 필요한 항목이 있어요. 입력을 확인해 주세요.')
     } catch (reason) {
+      if (reason instanceof ApiError && reason.code === 'LOCATION_SELECTION_UNAVAILABLE') {
+        setResults(null)
+        setSearchError(errorMessage(reason))
+        update({ place: null, step: easy ? destinationFieldIndex + 1 : step })
+        return
+      }
       setError(errorMessage(reason))
       onError(reason)
     } finally {
@@ -122,7 +129,7 @@ export default function ProfilePage({ session, easy, onSave, onError }: {
     </> },
     { label: '자주 가는 곳', summary: destination?.name ?? '', control: <>
       <div className="input-row">
-        <input aria-label="회사·학교·역 이름" value={query} disabled={searching} placeholder={demo ? '예: 멀티캠퍼스 역삼' : '회사·학교·역 이름'} onChange={event => { update({ query: event.target.value }); setResults(null); setSearchError('') }} onKeyDown={event => {
+        <input aria-label="회사·학교·역 이름" value={query} disabled={searching} placeholder="회사·학교·역 이름" onChange={event => { update({ query: event.target.value }); setResults(null); setSearchError('') }} onKeyDown={event => {
           if (event.key === 'Enter' && !event.nativeEvent.isComposing) { event.preventDefault(); void search() }
         }} />
         <button className="secondary" type="button" disabled={!query.trim() || searching} onClick={() => void search()}>{searching ? '검색 중…' : '검색'}</button>
@@ -169,8 +176,8 @@ export default function ProfilePage({ session, easy, onSave, onError }: {
         <fieldset className="form-fields" disabled={saving}>
           {easy ? review ? <h2>입력한 답변을 확인해 주세요</h2> : fieldCard({ ...current, label: questionLabel }) : <>
             <h2>기본 정보</h2><div className="field-grid">{fields.slice(0, 4).map(fieldCard)}</div>
-            <h2>예산</h2><div className="field-grid">{fields.slice(4, 6).map(fieldCard)}</div>
-            <h2>이사·이동 조건</h2><div className="field-grid">{fields.slice(6).map(fieldCard)}</div>
+            <h2>예산</h2><div className="field-grid">{fields.slice(4, destinationFieldIndex).map(fieldCard)}</div>
+            <h2>이사·이동 조건</h2><div className="field-grid">{fields.slice(destinationFieldIndex).map(fieldCard)}</div>
           </>}
         </fieldset>
         {easy && <div className="actions">

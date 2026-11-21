@@ -10,7 +10,6 @@ import com.aiyouth.pjt.model.enums.TotalStatus;
 
 /**
  * API 4·5 응답 (PolicyEvaluation). delta는 가정 계산(API 5)에서만 객체다.
- * calculationVersion이 "demo:"로 시작하면 승인된 시연 데이터로 만든 결과다.
  */
 public record PolicyEvaluationResponse(
         int inputRevision,

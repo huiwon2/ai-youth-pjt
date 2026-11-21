@@ -1,4 +1,3 @@
-import { demo } from '../api/firsthome'
 import type { Comparison, Session } from '../types/contracts'
 import type { SavedPolicy } from '../stores/savedPolicies'
 import { comparisonRows } from './comparisonRows'
@@ -14,7 +13,7 @@ export function comparisonText(session: Session, result: Comparison, saved: Save
   const winner = result.homes.find(home => home.homeId === result.recommendation.homeId)
   const priority = { BALANCED: '균형', COST: '돈', COMMUTE: '시간', NEIGHBORHOOD: '동네', CUSTOM: '직접 설정' }
   const lines = [
-    '내 첫 집 파일' + (demo ? ' (시연 예시)' : ''),
+    '내 첫 집 파일',
     '', '[현재 내 조건]',
     '출생연도 · ' + (p.birthYear === null ? unknown : p.birthYear + '년') + (age === null ? '' : ' (만 ' + age + '세)'),
     '올해 생일 · ' + (p.birthdayPassedThisYear === null ? unknown : p.birthdayPassedThisYear ? '오늘 또는 이미 지났어요' : '아직 안 지났어요'),
@@ -31,7 +30,7 @@ export function comparisonText(session: Session, result: Comparison, saved: Save
     '', '[후보 집 비교 결과]', '비교 ID · ' + result.comparisonId, '판정 기준일 · ' + result.assessmentDate,
     '비교 우선순위 · ' + priority[result.priorityPreset] + ' (돈 ' + result.weights.cost + '% · 시간 ' + result.weights.commute + '% · 동네 ' + result.weights.convenience + '%)',
   ]
-  if (!result.isCurrent || result.inputRevision !== session.revision) lines.push('이전 조건으로 만든 비교 결과예요.')
+  if (!result.isCurrent || result.inputRevision !== session.revision) lines.push('저장된 이전 비교 결과예요.')
   lines.push(winner ? '추천 후보 · ' + winner.label : '추천 순위 보류', ...result.recommendation.reasons, ...result.recommendation.tradeoffs)
   if (result.homes.length && result.homes.every(home => home.cost.maintenanceWon === null)) lines.push('각 집의 관리비를 확인해 주세요.')
   for (const home of result.homes) {

@@ -38,12 +38,12 @@ public class HomeTransactions {
     public PreviewInput previewInput(UUID sessionId, String token, int revision, UUID locationId) {
         SessionRow session = state.lockOwned(sessionId, token);
         Revisions.requireInput(revision, session.revision());
+        ChosenLocation home = choices.resolve(sessionId, locationId, "HOME");
         PlaceRow place = mapper.findPlace(sessionId);
         ChosenLocation destination = state.destination(place);
         if (place == null || place.destinationVersion() == null || !destination.location().hasCoordinates()) {
             throw ApiException.missingDestination();
         }
-        ChosenLocation home = choices.resolve(sessionId, locationId, "HOME");
         CommuteLimit limit = sessions.profile(session, place).commuteLimit();
         return new PreviewInput(home, destination, place.destinationVersion(), limit == null ? null : limit.minutes());
     }
@@ -81,6 +81,9 @@ public class HomeTransactions {
             throw expiredPreview();
         }
         PreviewDetails details = json.readValue(preview.details(), PreviewDetails.class);
+        if (!LocationChoices.KAKAO_SOURCE.equals(details.location().source())) {
+            throw expiredPreview();
+        }
         String label = request.has("label") ? request.text("label", 200) : details.location().location().address();
         long deposit = request.nonNegativeLong("depositWon");
         long rent = request.nonNegativeLong("monthlyRentWon");

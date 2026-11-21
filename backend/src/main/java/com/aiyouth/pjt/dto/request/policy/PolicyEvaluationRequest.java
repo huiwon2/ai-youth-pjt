@@ -19,10 +19,5 @@ public record PolicyEvaluationRequest(
             Boolean ownsHome,
             EmploymentStatus employmentStatus,
             HousingType housingType) {
-
-        public boolean isEmpty() {
-            return ageYears == null && monthlyIncomeWon == null && ownsHome == null && employmentStatus == null
-                    && housingType == null;
-        }
     }
 }

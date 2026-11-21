@@ -1,8 +1,5 @@
 import type { Comparison, ComparisonAnswer, PriorityPreset, Home, HomePreview, HomePut, LocationSearch, PolicyAnswer, PolicyEvaluation, ProfilePatch, Session } from '../types/contracts'
-import { demoApi } from '../mocks/firsthome'
 import { ApiError } from './errors'
-
-export const demo = import.meta.env.VITE_FIRSTHOME_API_MODE !== 'live'
 
 async function request<T>(path: string, method = 'GET', body?: unknown, revision?: number): Promise<T> {
   const response = await fetch('/api/v1/sessions' + path, {
@@ -24,7 +21,7 @@ async function request<T>(path: string, method = 'GET', body?: unknown, revision
 }
 
 const path = (id: string) => '/' + encodeURIComponent(id)
-const liveApi = {
+export const api = {
   create: () => request<Session>('', 'POST', {}),
   restore: (id: string) => request<Session>(path(id)),
   search: (id: string, query: string, kind: 'DESTINATION' | 'HOME' = 'DESTINATION') =>
@@ -53,5 +50,4 @@ const liveApi = {
     request<PolicyAnswer>(path(id) + '/policy-questions', 'POST', { inputRevision: revision, question }),
 }
 
-export const api: typeof liveApi = demo ? demoApi : liveApi
-export const sessionKey = demo ? 'firsthome:demo-session' : 'firsthome:live-session'
+export const sessionKey = 'firsthome:live-session'

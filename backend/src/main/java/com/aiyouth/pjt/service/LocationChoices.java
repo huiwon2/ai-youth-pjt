@@ -14,6 +14,8 @@ import tools.jackson.databind.ObjectMapper;
 
 @Service
 public class LocationChoices {
+    static final String KAKAO_SOURCE = "KAKAO";
+
     private final PlanningMapper mapper;
     private final SessionState state;
     private final ObjectMapper json;
@@ -30,7 +32,7 @@ public class LocationChoices {
     }
 
     @Transactional
-    public LocationSearch store(UUID id, String token, String kind, List<SearchChoice> choices, String source) {
+    public LocationSearch store(UUID id, String token, String kind, List<SearchChoice> choices) {
         state.lockOwned(id, token);
         OffsetDateTime now = state.now();
         mapper.deleteExpiredChoices(id, now);
@@ -38,23 +40,27 @@ public class LocationChoices {
         for (SearchChoice choice : choices) {
             UUID locationId = UUID.randomUUID();
             mapper.insertChoice(new ChoiceRow(locationId, id, kind,
-                    json.writeValueAsString(new StoredChoice(choice, source)), now.plusMinutes(15)));
+                    json.writeValueAsString(new StoredChoice(choice, KAKAO_SOURCE)), now.plusMinutes(15)));
             items.add(new LocationItem(locationId, choice.name(), choice.roadAddress(), choice.parcelAddress(),
                     choice.longitude(), choice.latitude(), choice.selectable(), choice.reason()));
         }
-        return new LocationSearch(List.copyOf(items), source);
+        return new LocationSearch(List.copyOf(items), KAKAO_SOURCE);
     }
 
     public ChosenLocation resolve(UUID sessionId, UUID id, String kind) {
         ChoiceRow row = mapper.findChoice(sessionId, id);
         if (row == null || !row.kind().equals(kind) || !row.expiresAt().isAfter(state.now())) {
-            throw ApiException.notFound();
+            throw unavailable();
         }
         StoredChoice stored = json.readValue(row.details(), StoredChoice.class);
-        if (!stored.choice().selectable()) {
-            throw new ApiException(422, "ADDRESS_NOT_SELECTABLE", "선택할 수 있는 주소를 다시 찾아 주세요.", false);
+        if (!stored.choice().selectable() || !KAKAO_SOURCE.equals(stored.source())) {
+            throw unavailable();
         }
         return new ChosenLocation(stored.choice().location(), stored.source());
+    }
+
+    private static ApiException unavailable() {
+        return new ApiException(404, "LOCATION_SELECTION_UNAVAILABLE", "주소를 다시 검색하고 선택해 주세요.", false);
     }
 
     private record StoredChoice(SearchChoice choice, String source) {}

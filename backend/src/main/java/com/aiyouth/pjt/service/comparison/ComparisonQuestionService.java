@@ -52,11 +52,10 @@ public class ComparisonQuestionService {
                                         String question) {
         Session session = sessions.getForInput(sessionId, token, inputRevision);
         ComparisonRun run = comparisonService.requireRun(sessionId, comparisonId);
-        if (!comparisonService.isCurrent(run, session.revision(), session.assessmentDate())) {
-            throw new ApiException(409, "STALE_COMPARISON", "입력이 바뀌어 이 비교 결과가 오래됐어요. 다시 비교해 주세요.",
-                    false);
-        }
         ComparisonResponse comparison = json.readValue(run.getResultSnapshot(), ComparisonResponse.class);
+        if (!comparisonService.isCurrent(run, comparison, session.revision(), session.assessmentDate())) {
+            throw new ApiException(409, "STALE_COMPARISON", "현재 조건으로 다시 비교한 뒤 질문해 주세요.", false);
+        }
         return answer(comparison, question.strip());
     }
 

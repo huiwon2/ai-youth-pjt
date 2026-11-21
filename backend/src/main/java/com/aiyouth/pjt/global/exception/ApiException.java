@@ -30,10 +30,6 @@ public final class ApiException extends RuntimeException {
                 List.of(new FieldError("profile.frequentPlace", "REQUIRED")));
     }
 
-    public static ApiException notFound() {
-        return new ApiException(404, "RESOURCE_NOT_FOUND", "요청한 정보를 찾을 수 없어요.", false);
-    }
-
     public int status() {
         return status;
     }

@@ -1,5 +1,4 @@
 import { Link } from 'react-router'
-import { demo } from '../../api/firsthome'
 import type { Comparison } from '../../types/contracts'
 import { money } from '../../utils/money'
 import { slotName, travel } from '../../utils/home'
@@ -9,7 +8,6 @@ export default function EasyComparison({ result }: { result: Comparison }) {
   const winner = result.homes.find(home => home.homeId === result.recommendation.homeId)
   return <>
     <section className="result-banner">
-      {demo && <p>시연 예시</p>}
       <h2>{allUnknown ? '먼저 관리비를 확인해 주세요' : winner ? winner.label + '부터 살펴보세요' : '먼저 볼 집을 아직 정하기 어려워요'}</h2>
       {allUnknown ? <>
         <p>모든 후보의 관리비가 비어 있어요. 한 달에 얼마를 내는지 알려면 집마다 관리비가 얼마인지 물어보세요.</p>

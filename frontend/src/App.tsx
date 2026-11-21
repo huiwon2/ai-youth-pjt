@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { BrowserRouter, Link, Navigate, Route, Routes, useParams, useLocation, useNavigate } from 'react-router'
-import { api, demo, sessionKey } from './api/firsthome'
+import { api, sessionKey } from './api/firsthome'
 import { ApiError, errorMessage } from './api/errors'
 import ProfilePage from './pages/ProfilePage'
 import ComparePage from './pages/ComparePage'
@@ -107,7 +107,6 @@ function FirstHome() {
                 }}>{easy && !session ? '일반 화면으로 볼래요' : '쉬운 화면으로 볼래요'}</button>
                 {session && <Link className="text-link" to={'/profile' + mode}>이전 작업 이어가기</Link>}
               </div>
-              {demo && <p className="muted">시연 모드에서는 예시 주소와 지원 결과를 사용해요.</p>}
               {error && <p role="alert" className="error">{error}</p>}
             </div>
             <div className="hero-art" aria-hidden="true"><div className="house"><div className="door" /></div><div className="sun" /><div className="ground" /></div>

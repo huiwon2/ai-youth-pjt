@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { api, demo } from '../api/firsthome'
+import { api } from '../api/firsthome'
 import { ApiError, errorMessage } from '../api/errors'
 import type { Home, HomePreview, LocationSearch, Session } from '../types/contracts'
 import { money, won } from '../utils/money'
@@ -48,8 +48,14 @@ export default function ComparePage({ session, mode, onSave, onError }: Props) {
     } catch (reason) {
       if (!active.current) return
       setError(errorMessage(reason))
-      if (reason instanceof ApiError && reason.code === 'PREVIEW_EXPIRED') setPreview(null)
-      else onError(reason)
+      if (reason instanceof ApiError && reason.code === 'LOCATION_SELECTION_UNAVAILABLE') {
+        setItems(null)
+        setPreview(null)
+      } else if (reason instanceof ApiError && reason.code === 'PREVIEW_EXPIRED') {
+        setPreview(null)
+      } else {
+        onError(reason)
+      }
     } finally {
       if (active.current) setBusy(false)
     }
@@ -91,7 +97,7 @@ export default function ComparePage({ session, mode, onSave, onError }: Props) {
           setItems((await api.search(sessionId, query.trim(), 'HOME')).items)
         })
       }}>
-        <label>집 주소<input value={query} disabled={busy} placeholder={demo ? '성수동, 역삼동 또는 신림동' : '건물 번호가 포함된 주소'} onChange={event => {
+        <label>집 주소<input value={query} disabled={busy} placeholder="건물 번호가 포함된 주소" onChange={event => {
           setQuery(event.target.value); setItems(null); setPreview(null)
         }} /></label><button className="secondary" disabled={busy || !query.trim()}>주소 검색</button>
       </form>
@@ -102,7 +108,7 @@ export default function ComparePage({ session, mode, onSave, onError }: Props) {
       })}>{item.name} · {item.roadAddress ?? item.parcelAddress}{!item.selectable && ' · 건물 주소 확인 필요'}</button></div>)}
       {preview && <>
         <h3>{preview.location.name}</h3><p>{preview.location.address}</p>
-        <p>{session.profile.frequentPlace?.name}까지 편도 · {travel(preview.route)} {demo && '(시연 예시)'}</p>
+        <p>{session.profile.frequentPlace?.name}까지 편도 · {travel(preview.route)}</p>
         <h4>주변 시설</h4>{preview.facilities.length ? <ul>{preview.facilities.map(item => <li key={item.category}>{facilityText(item)}</li>)}</ul> : <p>확인된 시설 정보가 없어요.</p>}
         {preview.warnings.map(item => <p key={item.code}>{item.message}</p>)}
         <form onSubmit={event => {

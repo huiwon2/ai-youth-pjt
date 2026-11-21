@@ -48,6 +48,10 @@ public final class PlanningResponse {
     public record Route(String status, String mode, String source, Integer durationSeconds,
                         Integer distanceMeters, Integer oneWayFareWon, Long overLimitSeconds,
                         List<Segment> segments, Geometry geometry, Instant queriedAt) {
+        public boolean hasLiveSource() {
+            return source == null || "ODSAY".equals(source) || "DISTANCE_ESTIMATE".equals(source);
+        }
+
         public Route withCommuteLimit(Integer minutes) {
             Long overLimit = durationSeconds == null || minutes == null
                     ? null : Math.max(0L, durationSeconds - minutes * 60L);
