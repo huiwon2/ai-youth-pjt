@@ -12,5 +12,5 @@ export const comparisonRows: [string, (home: ComparisonHome) => string][] = [
   ['월 교통비 (참고)', h => money(h.cost.monthlyTransportFareWon)],
   ['주변 시설', h => h.facilities.map(facilityText).join(' / ') || '확인 필요'],
   ['종합 점수', h => h.scores.total === null ? '확인 필요' : h.scores.total + '점'],
-  ['순위', h => h.rank !== null ? h.rank + '위' : h.cost.maintenanceWon === null ? '순위 보류 (관리비 미확인)' : '순위 보류'],
+  ['순위', h => h.rank == null ? '순위 보류' : h.rank + '위'],
 ]
