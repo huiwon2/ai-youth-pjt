@@ -1,0 +1,6 @@
+.env
+.env.*
+!.env.example
+.rag/
+node_modules/
+.claude/settings.local.json
