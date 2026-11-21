@@ -60,7 +60,7 @@ public record ComparisonResponse(
                                    String reason, List<Evidence> evidence) {
     }
 
-    /** 점수 환산식은 보류 상태다. 승인된 시연 값이 아니면 모두 null. */
+    /** 추천 서비스에서 받은 정수 점수. 순위가 보류된 집은 모두 null. */
     public record Scores(Integer cost, Integer commute, Integer convenience, Integer total) {
         public static Scores pending() {
             return new Scores(null, null, null, null);

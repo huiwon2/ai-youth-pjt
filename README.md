@@ -52,7 +52,7 @@
 
 ## 🗺️ 서비스 흐름과 시스템 구성
 
-아래는 서버 연동 목표입니다. 브라우저는 같은 출처에서 `/api/v1`을 호출합니다. 로컬에서는 Vite가 `/api`를 Spring Boot로 전달합니다. 운영 환경에서도 `/api` 프록시를 SPA 페이지 대체 규칙보다 먼저 적용하는 설계입니다.
+브라우저는 같은 출처의 `/api/v1`을 호출합니다. 로컬에서는 Vite, 배포 시에는 Vercel이 요청을 Spring Boot로 전달합니다. 네 서비스를 실행하는 명령과 Render 환경변수는 [통합 실행 및 배포](docs/service-integration.md)에 있습니다.
 
 ~~~mermaid
 flowchart LR
@@ -60,7 +60,9 @@ flowchart LR
     API --> DB[("PostgreSQL · 사용자 입력, 정책, 비교 스냅샷")]
     API --> K["카카오 로컬 · 주소와 주변 시설"]
     API --> O["ODsay · 대중교통 경로와 요금"]
-    API --> Q["근거 검색 및 LLM · 공고문 답변과 비교 설명"]
+    API --> Q["Node.js RAG · 공고문 질문"]
+    Q -->|검증된 근거 조회| DB
+    API --> R["Python recommend_house · 후보 점수와 순위"]
     KMAP["카카오 지도 JavaScript SDK"] -.-> UI
     DATA["정부24 · LH · 온통청년"] --> ETL["출처별 정제 및 카탈로그 출력"]
     ETL -.->|"DB 적재 연동 예정"| DB
@@ -181,7 +183,7 @@ npm.cmd ci
 npm.cmd run dev
 ~~~
 
-macOS·Linux에서는 `npm ci`, `npm run dev`를 사용합니다. 지도 연동용 설정은 `frontend/.env.example`을 복사한 `frontend/.env`에 `VITE_KAKAO_JS_KEY`로 지정합니다. 카카오 REST·ODsay·LLM 키의 자리표시자는 `backend/.env.example`에 있습니다. 실제 키를 담은 `.env`는 커밋에서 제외합니다.
+macOS·Linux에서는 `npm ci`, `npm run dev`를 사용합니다. 지도 연동용 설정은 `frontend/.env.example`을 복사한 `frontend/.env`에 `VITE_KAKAO_JS_KEY`로 지정합니다. 카카오 REST·ODsay 키는 `backend/.env.example`, 모델 키는 `rag/.env.example`을 참고합니다. 실제 키를 담은 `.env`는 커밋에서 제외합니다.
 
 | 서비스 | 주소 |
 | --- | --- |

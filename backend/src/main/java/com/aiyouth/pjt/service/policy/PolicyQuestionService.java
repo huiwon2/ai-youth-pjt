@@ -28,9 +28,9 @@ import com.aiyouth.pjt.service.PlanningSessions;
 /**
  * API 6 공고문 질문.
  * <ol>
- *   <li>Python RAG 서비스가 답과 근거 ID를 돌려주면, Java가 근거의 VERIFIED 여부와 답변 숫자를 확인한다.</li>
+ *   <li>Node.js RAG 서비스가 답과 근거 ID를 돌려주면, Java가 근거의 VERIFIED 여부와 답변 숫자를 확인한다.</li>
  *   <li>숫자가 근거에 없으면 AI 문장 대신 원문 발췌(SOURCE_EXCERPT)로 답한다.</li>
- *   <li>Python을 쓸 수 없으면 키워드로 찾은 원문 발췌를 FALLBACK으로 보여주고, 그마저 없으면 근거 없음을 알린다.</li>
+ *   <li>RAG 서버를 쓸 수 없으면 키워드로 찾은 원문 발췌를 FALLBACK으로 보여주고, 그마저 없으면 근거 없음을 알린다.</li>
  * </ol>
  * 세션 소유권(작업 쿠키)·만료·입력 버전은 {@link PlanningSessions#getForInput}이 확인한다.
  * 등록된 시연 대체 답변(PREPARED_ANSWER)은 승인된 질문·답변 문안이 준비되면 추가한다.
@@ -84,6 +84,11 @@ public class PolicyQuestionService {
             return answer(ctx, AnswerStatus.OUT_OF_SCOPE, AnswerText.toPlain(ai.answer()), null, List.of(), links);
         }
         List<RagChunk> chunks = retriever.verifiedByIds(ai.evidenceIds());
+        if ("EXCERPT".equals(ai.status()) && !chunks.isEmpty()) {
+            String excerpt = chunks.stream().anyMatch(c -> c.getContent().contains(ai.answer()))
+                    ? AnswerText.toPlain(ai.answer()) : "관련 공고문 원문을 확인해 주세요.";
+            return answer(ctx, AnswerStatus.ANSWERED, excerpt, AnswerSource.SOURCE_EXCERPT, chunks, links);
+        }
         if (status != AnswerStatus.ANSWERED || chunks.isEmpty()) {
             // 검증된 근거 없이 '답변함'이라고 한 경우도 근거 없음으로 본다
             return answer(ctx, AnswerStatus.NO_EVIDENCE, MSG_NO_EVIDENCE, null, List.of(), links);

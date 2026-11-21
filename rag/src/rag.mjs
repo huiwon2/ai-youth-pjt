@@ -176,7 +176,8 @@ export class Store {
     } catch (error) { this.db.exec('ROLLBACK'); throw error; }
   }
   policy(key) {
-    return JSON.parse(this.db.prepare('SELECT record FROM policies WHERE key=?').get(key).record);
+    const row = this.db.prepare('SELECT record FROM policies WHERE key=?').get(key);
+    return row ? JSON.parse(row.record) : null;
   }
   policies() { return this.db.prepare('SELECT record FROM policies ORDER BY key').all().map(row => JSON.parse(row.record)); }
 }

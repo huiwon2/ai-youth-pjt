@@ -1,3 +1,6 @@
+server:
+  port: ${PORT:8080}
+
 spring:
   application:
     name: ai-youth-pjt
@@ -22,6 +25,7 @@ mybatis:
     map-underscore-to-camel-case: true
 
 firsthome:
+  recommend-url: ${RECOMMENDATION_SERVICE_URL:http://localhost:8001}
   allowed-origins: ${FIRSTHOME_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
   session:
     ttl-days: ${FIRSTHOME_SESSION_TTL_DAYS:7}
@@ -30,7 +34,7 @@ firsthome:
     kakao-key: ${KAKAO_REST_API_KEY:}
     odsay-key: ${ODSAY_WEB_KEY:}
   rag:
-    # 공고문 질문(API 6)의 Python RAG 서비스. 꺼져 있거나 응답이 없으면 DB 원문 발췌로 대체
-    enabled: ${RAG_SERVICE_ENABLED:false}
+    # 공고문 질문(API 6)의 Node RAG 서비스. 꺼져 있거나 응답이 없으면 DB 원문 발췌로 대체
+    enabled: ${RAG_SERVICE_ENABLED:true}
     base-url: ${RAG_SERVICE_URL:http://localhost:8000}
     timeout: ${RAG_SERVICE_TIMEOUT:15s}

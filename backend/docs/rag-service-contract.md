@@ -1,7 +1,7 @@
-# 공고문 질문 Python RAG 서비스 계약 (API 6)
+# 공고문 질문 Node.js RAG 서비스 계약 (API 6)
 
-Spring Boot가 `POST /api/v1/sessions/{sessionId}/policy-questions`를 받으면 Python 서비스를 호출한다.
-프롬프트·임베딩·검색·LLM 호출은 Python이 맡고, Java는 근거 확인과 최종 응답 형식을 맡는다.
+Spring Boot가 `POST /api/v1/sessions/{sessionId}/policy-questions`를 받으면 Node.js 서비스를 호출한다.
+프롬프트·임베딩·검색·LLM 호출은 Node.js가 맡고, Java는 근거 확인과 최종 응답 형식을 맡는다.
 
 ## 호출
 
@@ -32,7 +32,7 @@ Spring Boot가 `POST /api/v1/sessions/{sessionId}/policy-questions`를 받으면
 
 | 필드 | 규칙 |
 |---|---|
-| status | `ANSWERED` / `NO_EVIDENCE` / `OUT_OF_SCOPE` |
+| status | `ANSWERED` / `EXCERPT` / `NO_EVIDENCE` / `OUT_OF_SCOPE` |
 | answer | 사용자에게 보여줄 문장 |
 | evidenceIds | 답변에 사용한 `rag_chunks.id` 목록 |
 | helpLinks | 선택. 상담·원문 링크 |
@@ -45,7 +45,7 @@ Spring Boot가 `POST /api/v1/sessions/{sessionId}/policy-questions`를 받으면
 3. `answer`의 숫자(금액·날짜·개월 수) 중 근거 원문에 없는 것이 있으면 → AI 문장을 버리고 원문 발췌(`SOURCE_EXCERPT`)로 답한다.
 4. 연결 실패·시간 초과·5xx·형식 오류 → Java가 키워드로 검증된 문단을 찾아 `FALLBACK`으로 보여준다.
 
-따라서 Python은 **검증된 문단만 검색 대상으로 삼고**, 답변의 숫자는 근거 원문 표기 그대로 쓰는 것이 좋다.
+Node.js는 카탈로그에서 찾은 인용문을 같은 정책의 검증된 PostgreSQL 문단과 대조한다. 모델 키가 없으면 검증된 원문을 직접 발췌해 `EXCERPT`를 반환하고, Java는 이를 `SOURCE_EXCERPT`로 표시한다.
 
 ## 로컬 확인
 
@@ -55,4 +55,4 @@ RAG_SERVICE_ENABLED=true
 RAG_SERVICE_URL=http://localhost:8000
 ```
 
-Java는 요청 본문에 `Content-Length`를 붙여 보낸다(청크 전송 아님). Flask 개발 서버에서도 읽을 수 있다.
+서비스별 실행 명령과 DB 환경변수는 [통합 실행 및 배포](../../docs/service-integration.md)를 참고한다.

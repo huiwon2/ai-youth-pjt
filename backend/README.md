@@ -63,13 +63,14 @@ ODSAY_WEB_KEY=<ODsay 서버 API 키>
 > - 값에 따옴표(`"`)를 붙이지 마세요. 따옴표까지 값으로 인식됩니다.
 > - `.env`는 `.gitignore`에 포함되어 있어 커밋되지 않습니다. 절대 커밋하지 마세요.
 
-선택 설정 (공고문 질문)
+내부 서비스 설정
 
 | 키 | 기본값 | 의미 |
 |---|---|---|
-| `RAG_SERVICE_ENABLED` | `false` | 공고문 질문에 Python RAG 서비스를 호출. 꺼져 있거나 응답이 없으면 DB 원문 발췌로 대체 |
+| `RAG_SERVICE_ENABLED` | `true` | 공고문 질문에 Node.js RAG 서비스를 호출. 꺼져 있거나 응답이 없으면 DB 원문 발췌로 대체 |
 | `RAG_SERVICE_URL` | `http://localhost:8000` | RAG 서비스 주소. 계약은 [docs/rag-service-contract.md](docs/rag-service-contract.md) |
 | `RAG_SERVICE_TIMEOUT` | `15s` | RAG 응답 대기 한도. 프론트 로딩 기준과 같음. 넘으면 원문 발췌로 대체 |
+| `RECOMMENDATION_SERVICE_URL` | `http://localhost:8001` | 집 비교 시 Python 추천 서비스 호출 |
 
 ## 3. DB 실행 (Docker)
 
@@ -197,7 +198,7 @@ SELECT review_decision, count(*) FROM policies GROUP BY review_decision;
 |---|---|
 | 지원 조회·가정의 `policies` | `INCLUDE` 정책만 내려갑니다. 대상이 없으면 `[]`입니다. |
 | `summary.potentialTotalWon`, 정책별 `benefit`의 금액, 가정의 `delta`에 담기는 두 합계 | 현재 정책 판정·금액 산식이 보류되어 `null`입니다. 정책이 적재되면 항목은 `CHECK_NEEDED`, 합계는 `totalStatus: "UNKNOWN"`으로 내려갑니다. |
-| 집 비교의 `homes[].rank`, `homes[].scores` 각 값, `recommendation.homeId`, `homes[].cost.monthlyAfterSupportWon` | 현재 점수 산식과 집별 지원 산식이 보류되어 `null`입니다. 응답은 `PARTIAL`이며 `rankedHomeIds`와 집별 `policyResults`는 `[]`입니다. 입력한 보증금·월세·관리비와 조회된 이동 시간·교통비는 응답에 반영합니다. 관리비 미확인은 `maintenanceWon: null`이며, 이때 월 주거비는 월세만 포함합니다. |
+| 집 비교의 `homes[].rank`, `homes[].scores` 각 값, `recommendation.homeId`, `homes[].cost.monthlyAfterSupportWon` | Python 추천 서비스에서 순위와 점수를 받아 함께 저장합니다. 관리비·통근 시간 미확인, 통근 한도 초과 또는 추천 서버 장애 시 해당 순위를 보류합니다. 집별 지원 산식이 보류되어 `monthlyAfterSupportWon`은 `null`, `policyResults`는 `[]`, 비교 상태는 `PARTIAL`입니다. 입력한 보증금·월세·관리비와 조회된 이동 시간·교통비는 응답에 반영합니다. 관리비 미확인은 `maintenanceWon: null`이며, 이때 월 주거비는 월세만 포함합니다. |
 | 미리보기·비교의 `route.geometry` | ODsay 대중교통 경로는 `OK`여도 현재 `null`입니다. 시간·요금과 후보·목적지 마커는 표시할 수 있습니다. 도보 추정(`ESTIMATED`)은 직선 좌표가 있어 점선으로 표시합니다. 경로를 못 찾거나 조회할 수 없으면 `NOT_FOUND` 또는 `UNAVAILABLE`이고 시간·요금·좌표는 `null`입니다. |
 
 ### 지원·비교 기능에서 재사용
