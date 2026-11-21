@@ -1,5 +1,10 @@
-.env*
-.git
-.gradle
-build
-*.log
+*
+!Dockerfile
+!build.gradle
+!settings.gradle
+!gradlew
+!gradle/
+!gradle/**
+!src/
+!src/**
+!render-egress-check.sh
