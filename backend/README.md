@@ -48,12 +48,14 @@ Copy-Item .env.example .env
 ```
 
 `.env`에서 비어 있는 값을 채웁니다. **실제 값은 PM에게 문의**하세요.
-실행에 꼭 필요한 값은 `DB_PASSWORD` 하나이고, `DB_NAME`, `DB_USER`는 기본값을 그대로 두면 됩니다.
+서버 시작에는 DB 비밀번호가 필요합니다. 주소·경로 연동까지 확인하려면 아래 두 공급원 키도 등록합니다.
 
 ```
 DB_NAME=ai_youth_pjt_db
 DB_USER=postgres
 DB_PASSWORD=<비밀번호>
+KAKAO_REST_API_KEY=<카카오 로컬 REST API 키>
+ODSAY_WEB_KEY=<ODsay 서버 API 키>
 ```
 
 > - `backend/.env` 하나를 Docker(DB)와 Spring(백엔드)이 **같이** 읽습니다. 값을 바꾸면 양쪽에 모두 반영됩니다.
@@ -61,11 +63,10 @@ DB_PASSWORD=<비밀번호>
 > - 값에 따옴표(`"`)를 붙이지 마세요. 따옴표까지 값으로 인식됩니다.
 > - `.env`는 `.gitignore`에 포함되어 있어 커밋되지 않습니다. 절대 커밋하지 마세요.
 
-선택 설정 (지원 판정·비교·공고문 질문)
+선택 설정 (공고문 질문)
 
 | 키 | 기본값 | 의미 |
 |---|---|---|
-| `DEMO_MODE` | `false` | `true`면 승인된 시연 조건(만 27세·월 230만·보증금 2,000만·멀티캠퍼스) 입력에만 기획서 예시 값(520만 원, 87점 등)을 사용. 응답의 `calculationVersion`이 `demo:`로 시작. 시연 경로·장소는 `FIRSTHOME_DEMO_PLACES=true`와 함께 사용 |
 | `RAG_SERVICE_ENABLED` | `false` | 공고문 질문에 Python RAG 서비스를 호출. 꺼져 있거나 응답이 없으면 DB 원문 발췌로 대체 |
 | `RAG_SERVICE_URL` | `http://localhost:8000` | Python RAG 서비스 주소. 계약은 [docs/rag-service-contract.md](docs/rag-service-contract.md) |
 
@@ -166,19 +167,37 @@ backend/src/main/
 | 8. 집 저장·교체 | `PUT /api/v1/sessions/{sessionId}/homes/1` | 헤더 `If-Match: "1"`, 본문 `{"previewId":"<미리보기 ID>","depositWon":10000000,"monthlyRentWon":600000,"maintenanceWon":null}` |
 | 9. 집 삭제 | `DELETE /api/v1/sessions/{sessionId}/homes/1` | 저장 응답의 최신 `revision`을 `If-Match`로 보냄 |
 
-- 검색 결과의 `selectable:false` 항목은 선택할 수 없습니다. 검색 ID와 미리보기 ID는 각각 발급 후 15분 동안 사용할 수 있습니다. 목적지를 바꾸면 기존 미리보기로 저장할 때 `409 PREVIEW_EXPIRED`가 반환됩니다.
+- 검색 ID와 미리보기 ID의 유효기간은 각각 발급 후 15분입니다. 프로필 저장과 집 미리보기는 유효한 세션의 검색 ID가 만료되거나, 검색 종류·소유 세션이 다르거나, 선택 불가 항목이거나, 조회할 수 없으면 `404 LOCATION_SELECTION_UNAVAILABLE`을 반환합니다. 누락되거나 UUID 형식에 맞지 않는 요청 필드는 `422 FIELD_INVALID`입니다.
+- 이 404를 받으면 같은 세션·쿠키를 유지하고 기존 검색 결과를 비운 뒤 재검색합니다. 새 `locationId`로 아직 저장하지 않은 프로필을 다시 제출하거나 새 집 미리보기를 요청할 수 있습니다. 검색과 실패한 저장·미리보기 요청은 `revision`을 올리지 않습니다.
+- 집 저장에서 미리보기 ID가 만료되었거나 해당 미리보기의 목적지가 현재 목적지와 다르면 `409 PREVIEW_EXPIRED`를 반환합니다. 미리보기를 다시 받은 뒤 저장합니다. 세션이 만료되거나 쿠키 소유권을 확인할 수 없는 경우에는 `401 SESSION_EXPIRED`를 반환합니다.
 - 경로 또는 시설 일부가 실패해도 미리보기는 `200`으로 응답합니다. 예를 들어 약국 조회에 실패하면 `facilities`의 약국 항목은 `status:"UNAVAILABLE"`이고 `warnings`에 `FACILITY_UNAVAILABLE`이 들어갑니다. 정상 조회에서 2km 안에 결과가 없으면 `NOT_FOUND`입니다.
-- 수정 요청에 최신 `If-Match`가 없으면 `428 PRECONDITION_REQUIRED`, 값이 다르면 `412 REVISION_MISMATCH`입니다. 오래된 `inputRevision`으로 미리보기를 요청하면 `409 STALE_INPUT`입니다. 만료된 세션의 응답 형태는 아래와 같습니다.
+- 수정 요청에 최신 `If-Match`가 없으면 `428 PRECONDITION_REQUIRED`, 값이 다르면 `412 REVISION_MISMATCH`입니다. 오래된 `inputRevision`으로 미리보기를 요청하면 `409 STALE_INPUT`입니다. 오류 응답은 아래 형식을 사용합니다.
 
 ```json
-{"error":{"code":"SESSION_EXPIRED","message":"작업 세션이 만료됐거나 쿠키를 확인할 수 없어요.","fields":[],"retryable":false},"requestId":"<요청 ID>"}
+{"error":{"code":"LOCATION_SELECTION_UNAVAILABLE","message":"선택한 주소를 다시 검색해 주세요.","fields":[],"retryable":false},"requestId":"<요청 ID>"}
 ```
 
-### 공급원과 로컬 시연
+### 실제 연동 설정
 
-- 실제 조회는 `backend/.env`의 `KAKAO_REST_API_KEY`, `ODSAY_WEB_KEY`를 사용합니다. 실데이터 모드에서 카카오 키가 없으면 주소 검색은 `503 UPSTREAM_UNAVAILABLE`입니다. ODsay 경로가 없거나 조회에 실패한 경우 가까운 거리는 `DISTANCE_ESTIMATE`로 도보 시간을 표시하고, 확인되지 않은 요금은 `null`로 반환합니다.
-- 키 없이 확인하려면 로컬 환경에서 `FIRSTHOME_DEMO_PLACES=true`로 실행합니다. 목적지에서 **멀티캠퍼스 역삼**, 집에서 **성수동2가 333-76**, **역삼동 778-26**, **신림동 502-36**을 검색할 수 있습니다. 검색과 시연 경로의 출처는 `DEMO`이고 준비된 데이터가 없는 시설은 `UNAVAILABLE`로 표시합니다.
+- `KAKAO_REST_API_KEY`는 카카오 로컬 주소·장소·주변 시설 조회에 사용합니다. 키가 없거나 주소 조회에 실패하면 `503 UPSTREAM_UNAVAILABLE`을 반환합니다. [카카오맵 API](https://developers.kakao.com/docs/ko/kakaomap/common)
+- `ODSAY_WEB_KEY`에는 백엔드 발신 공인 IP를 등록한 ODsay **서버 API 키**를 사용합니다. ODsay를 이용할 수 없으면 경로 결과가 부분적으로 비어 있을 수 있습니다. [ODsay 서버 플랫폼 안내](https://lab.odsay.com/community/boardView?seq=716)
+- Vite 개발 서버는 `/api`를 백엔드의 8080 포트로 프록시합니다. 배포 시 프론트와 같은 출처에서 `/api/v1`에 접근하도록 구성합니다. 카카오 배경 지도가 필요하면 프론트에 `VITE_KAKAO_JS_KEY`를 설정합니다.
 - 쿠키의 `Secure`는 기본적으로 켜져 있습니다. 로컬 HTTP 클라이언트가 쿠키를 전달하지 않으면 로컬 실행에 한해 `FIRSTHOME_SESSION_COOKIE_SECURE=false`를 사용합니다. 배포 환경의 공개 URL이 백엔드와 다른 경우 `FIRSTHOME_ALLOWED_ORIGINS`에 프론트의 공개 출처를 설정합니다. 세션 발급 후 유효기간의 기본값은 7일이며 `FIRSTHOME_SESSION_TTL_DAYS`로 조정합니다.
+
+### 빈 값과 부분 결과
+
+Flyway는 테이블을 생성합니다. 정책 카탈로그는 연결된 DB의 `policies` 테이블에 별도로 적재합니다. 아래 쿼리에서 `INCLUDE` 행이 없으면 지원 조회 목록이 비어 있습니다.
+
+```sql
+SELECT review_decision, count(*) FROM policies GROUP BY review_decision;
+```
+
+| 응답 필드 | 값이 비는 조건 |
+|---|---|
+| 지원 조회·가정의 `policies` | `INCLUDE` 정책만 내려갑니다. 대상이 없으면 `[]`입니다. |
+| `summary.potentialTotalWon`, 정책별 `benefit`의 금액, 가정의 `delta`에 담기는 두 합계 | 현재 정책 판정·금액 산식이 보류되어 `null`입니다. 정책이 적재되면 항목은 `CHECK_NEEDED`, 합계는 `totalStatus: "UNKNOWN"`으로 내려갑니다. |
+| 집 비교의 `homes[].rank`, `homes[].scores` 각 값, `recommendation.homeId`, `homes[].cost.monthlyAfterSupportWon` | 현재 점수 산식과 집별 지원 산식이 보류되어 `null`입니다. 응답은 `PARTIAL`이며 `rankedHomeIds`와 집별 `policyResults`는 `[]`입니다. 입력한 보증금·월세·관리비와 조회된 이동 시간·교통비는 응답에 반영합니다. 관리비 미확인은 `maintenanceWon: null`이며, 이때 월 주거비는 월세만 포함합니다. |
+| 미리보기·비교의 `route.geometry` | ODsay 대중교통 경로는 `OK`여도 현재 `null`입니다. 시간·요금과 후보·목적지 마커는 표시할 수 있습니다. 도보 추정(`ESTIMATED`)은 직선 좌표가 있어 점선으로 표시합니다. 경로를 못 찾거나 조회할 수 없으면 `NOT_FOUND` 또는 `UNAVAILABLE`이고 시간·요금·좌표는 `null`입니다. |
 
 ### 지원·비교 기능에서 재사용
 

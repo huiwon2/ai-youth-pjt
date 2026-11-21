@@ -23,14 +23,11 @@ import org.springframework.stereotype.Service;
 class HomeLookups {
     private final KakaoLocal kakao;
     private final OdsayTransit odsay;
-    private final DemoPlaces demo;
     private final Executor executor;
 
-    HomeLookups(KakaoLocal kakao, OdsayTransit odsay, DemoPlaces demo,
-                @Qualifier("homeLookupExecutor") Executor executor) {
+    HomeLookups(KakaoLocal kakao, OdsayTransit odsay, @Qualifier("homeLookupExecutor") Executor executor) {
         this.kakao = kakao;
         this.odsay = odsay;
-        this.demo = demo;
         this.executor = executor;
     }
 
@@ -39,7 +36,7 @@ class HomeLookups {
     }
 
     HomeLookup refresh(ChosenLocation home, ChosenLocation destination, HomeLookup saved, boolean refreshRoute, Instant now) {
-        if ("DEMO".equals(home.source()) || !home.location().hasCoordinates()) {
+        if (!home.location().hasCoordinates()) {
             return assemble(route(home, destination, now), unavailableFacilities(), now);
         }
         CompletableFuture<Route> route = refreshRoute
@@ -61,12 +58,6 @@ class HomeLookups {
         if (destination == null || !destination.location().hasCoordinates() || !home.location().hasCoordinates()) {
             return OdsayTransit.empty("UNAVAILABLE", null, now);
         }
-        if ("DEMO".equals(home.source())) {
-            return demo.route(home.location(), destination.location(), now);
-        }
-        if ("DEMO".equals(destination.source())) {
-            return OdsayTransit.empty("UNAVAILABLE", null, now);
-        }
         return odsay.route(home.location(), destination.location(), now);
     }
 
@@ -77,9 +68,6 @@ class HomeLookups {
             case "NOT_FOUND" -> warnings.add(new Warning("ROUTE_NOT_FOUND", "route", "대중교통 경로를 찾지 못했어요."));
             case "UNAVAILABLE" -> warnings.add(new Warning("ROUTE_UNAVAILABLE", "route", "이동 경로를 확인하지 못했어요."));
             default -> {}
-        }
-        if ("DEMO".equals(route.source())) {
-            warnings.add(new Warning("DEMO_DATA", "route", "시연용으로 준비한 경로예요."));
         }
         for (Facility facility : facilities) {
             if (facility.status().equals("UNAVAILABLE")) {
