@@ -7,3 +7,4 @@
 !gradle/**
 !src/
 !src/**
+!render-egress-check.sh
