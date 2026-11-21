@@ -99,6 +99,23 @@ node scripts/verify-grounding.mjs
 
 테스트는 파일 중복 방지, 중첩 필드 및 청크 보존, 임베딩 캐시·중단 복구, 검색 결과, API 요청·오류 처리와 출처 번호를 확인합니다. 모의 API 테스트와 실제 API 표본 검증은 서로 별개입니다.
 
+## 백엔드(API 6) 형식 출력
+
+`ask --backend`는 답변을 백엔드 공고문 질문 API(`PolicyAnswer`)와 같은 모양의 JSON으로 출력합니다. 변환은 `src/backend-format.mjs`의 `toBackendAnswer()`가 담당하며 원문 문장·숫자는 바꾸지 않습니다.
+
+```powershell
+node src/cli.mjs ask "근로장려금 지원 금액 알려줘" --backend
+```
+
+| 필드 | 내용 |
+|---|---|
+| `status` | `ANSWERED` / `NO_EVIDENCE` / `OUT_OF_SCOPE` / `FALLBACK` (RAG 상태 10개를 변환) |
+| `answer` | 원문 인용 답변을 마크다운(`###`, `**`, `>`)과 출처 번호(`[n]`) 없이 조립한 평문. 안내 상태는 안내 문구 |
+| `evidence` | `{id: "정책키:필드경로", policyKey, title: "정책명 · 필드 이름", excerpt: 원문 필드 값, sourceUrl, locator: 필드경로}` |
+| `ragStatus` | 원래 RAG 상태 (로그·디버깅용) |
+
+상태 대응과 `needs_clarification` 처리는 팀 논의 전 임시안입니다. 근거가 있는 `needs_clarification`은 원문과 안내를 함께 보내기 위해 `ANSWERED`로 바꿉니다.
+
 ## 30문항 평가
 
 아래 두 세트의 결과는 원문 제한을 적용하기 전 구현의 기록입니다. 기존 보고서는 보존했습니다.
