@@ -37,4 +37,4 @@ firsthome:
     # 공고문 질문(API 6)의 Python RAG 서비스. 꺼져 있거나 응답이 없으면 DB 원문 발췌로 대체
     enabled: ${RAG_SERVICE_ENABLED:false}
     base-url: ${RAG_SERVICE_URL:http://localhost:8000}
-    timeout: ${RAG_SERVICE_TIMEOUT:8s}
+    timeout: ${RAG_SERVICE_TIMEOUT:15s}

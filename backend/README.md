@@ -67,7 +67,8 @@ DB_PASSWORD=<비밀번호>
 |---|---|---|
 | `DEMO_MODE` | `false` | `true`면 승인된 시연 조건(만 27세·월 230만·보증금 2,000만·멀티캠퍼스) 입력에만 기획서 예시 값(520만 원, 87점 등)을 사용. 응답의 `calculationVersion`이 `demo:`로 시작. 시연 경로·장소는 `FIRSTHOME_DEMO_PLACES=true`와 함께 사용 |
 | `RAG_SERVICE_ENABLED` | `false` | 공고문 질문에 Python RAG 서비스를 호출. 꺼져 있거나 응답이 없으면 DB 원문 발췌로 대체 |
-| `RAG_SERVICE_URL` | `http://localhost:8000` | Python RAG 서비스 주소. 계약은 [docs/rag-service-contract.md](docs/rag-service-contract.md) |
+| `RAG_SERVICE_URL` | `http://localhost:8000` | RAG 서비스 주소. 계약은 [docs/rag-service-contract.md](docs/rag-service-contract.md) |
+| `RAG_SERVICE_TIMEOUT` | `15s` | RAG 응답 대기 한도. 프론트 로딩 기준과 같음. 넘으면 원문 발췌로 대체 |
 
 ## 3. DB 실행 (Docker)
 

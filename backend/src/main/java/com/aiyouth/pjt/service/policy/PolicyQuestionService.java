@@ -16,6 +16,7 @@ import com.aiyouth.pjt.llm.assistant.RagServiceClient;
 import com.aiyouth.pjt.llm.assistant.RagServiceClient.RagAnswer;
 import com.aiyouth.pjt.llm.assistant.RagServiceClient.RagQuestion;
 import com.aiyouth.pjt.llm.guard.AnswerNumberGuard;
+import com.aiyouth.pjt.llm.guard.AnswerText;
 import com.aiyouth.pjt.llm.retriever.SourceExcerptRetriever;
 import com.aiyouth.pjt.mapper.PolicyMapper;
 import com.aiyouth.pjt.model.Policy;
@@ -80,7 +81,7 @@ public class PolicyQuestionService {
         }
         AnswerStatus status = parseStatus(ai.status());
         if (status == AnswerStatus.OUT_OF_SCOPE) {
-            return answer(ctx, AnswerStatus.OUT_OF_SCOPE, ai.answer(), null, List.of(), links);
+            return answer(ctx, AnswerStatus.OUT_OF_SCOPE, AnswerText.toPlain(ai.answer()), null, List.of(), links);
         }
         List<RagChunk> chunks = retriever.verifiedByIds(ai.evidenceIds());
         if (status != AnswerStatus.ANSWERED || chunks.isEmpty()) {
@@ -91,7 +92,9 @@ public class PolicyQuestionService {
         if (!AnswerNumberGuard.numbersSupported(ai.answer(), sources)) {
             return answer(ctx, AnswerStatus.ANSWERED, MSG_EXCERPT, AnswerSource.SOURCE_EXCERPT, chunks, links);
         }
-        return answer(ctx, AnswerStatus.ANSWERED, ai.answer(), AnswerSource.GROUNDED, chunks, links);
+        // 숫자 검증은 원래 답변으로 하고, 화면에는 평문으로 보낸다 (프론트는 문자열을 그대로 출력)
+        return answer(ctx, AnswerStatus.ANSWERED, AnswerText.toPlain(ai.answer()), AnswerSource.GROUNDED, chunks,
+                links);
     }
 
     private List<HelpLink> policyLinks(String policyKey) {
