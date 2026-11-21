@@ -3,7 +3,8 @@ import { Link } from 'react-router'
 import { api, demo } from '../api/firsthome'
 import { errorMessage } from '../api/errors'
 import type { Comparison, Session } from '../types/contracts'
-import { slotName } from '../utils/home'
+import ComparisonMap from '../components/map/ComparisonMap'
+import { homeTitle } from '../utils/home'
 import EasyComparison from '../components/easy/EasyComparison'
 import ComparisonActions from '../components/compare/ComparisonActions'
 import { comparisonRows } from '../utils/comparisonRows'
@@ -38,11 +39,14 @@ export default function ComparisonPage({ session, comparisonId, mode, onSave, in
       </section>
       <div className="panel comparison-table" tabIndex={0} role="region" aria-label="후보별 비교표">
         <table><caption>후보별 비용과 이동 조건 {demo && '(예시)'}</caption>
-          <thead><tr><th scope="col">비교 항목</th>{result.homes.map(home => <th scope="col" key={home.homeId}>후보 {slotName(home.slot)} · {home.label}<small>{home.location.address}</small></th>)}</tr></thead>
+          <thead><tr><th scope="col">비교 항목</th>{result.homes.map(home => <th scope="col" key={home.homeId}>{homeTitle(home)}<small>{home.location.address}</small></th>)}</tr></thead>
           <tbody>{comparisonRows.map(([name, format]) => <tr key={name}><th scope="row">{name}</th>{result.homes.map(home => <td key={home.homeId}>{format(home)}</td>)}</tr>)}</tbody>
         </table>
       </div>
       </>}
+      <ComparisonMap result={result} destination={result.destination === undefined
+        ? (result.isCurrent && result.inputRevision === session.revision ? session.profile.frequentPlace : null)
+        : result.destination} />
       <ExportComparison result={result} session={session} />
       <ComparisonActions session={session} result={result} comparisonId={comparisonId} mode={mode} onSave={onSave} onRecalculated={onRecalculated} />
       {!mode && result.warnings.map((item, index) => <p key={index}>{item.message}</p>)}

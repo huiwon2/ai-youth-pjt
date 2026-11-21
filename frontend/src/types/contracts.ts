@@ -128,6 +128,7 @@ export type ComparisonHome = {
   rank:number|null;
 };
 export type Comparison = {
+  destination?:Location|null;
   comparisonId:UUID; inputRevision:number; assessmentDate:DateString;
   calculationVersion:string; status:"COMPLETE"|"PARTIAL"; isCurrent:boolean;
   priorityPreset:Preset; weights:Weights; homes:ComparisonHome[];

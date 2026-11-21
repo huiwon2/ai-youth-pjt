@@ -1,7 +1,9 @@
-import type { Facility, Route } from '../types/contracts'
+import type { ComparisonHome, Facility, Route } from '../types/contracts'
 
 export const slots = [1, 2, 3] as const
 export const slotName = (slot: number) => ['A', 'B', 'C'][slot - 1]
+
+export const homeTitle = (home: ComparisonHome) => '후보 ' + slotName(home.slot) + ' · ' + home.label
 
 export function travel(route: Route) {
   if (route.status === 'UNAVAILABLE') return '조회 실패'

@@ -29,17 +29,22 @@ function read<T>(key: string): T | null {
 
 function sampleRoute(session: Session, example: Example | undefined): Route {
   const known = session.profile.frequentPlace?.name === '멀티캠퍼스 역삼' && example
+  const destination = session.profile.frequentPlace
+  const geometry: Route['geometry'] = known && destination ? {
+    type: 'LineString',
+    coordinates: [[known.lng, known.lat], [known.lng, destination.latitude], [destination.longitude, destination.latitude]],
+  } : null
   return {
-    status: known ? 'OK' : 'UNAVAILABLE', mode: known ? known.walk ? 'WALK' : 'TRANSIT' : null,
+    status: known ? (known.id === 'demo-home-sillim' ? 'ESTIMATED' : 'OK') : 'UNAVAILABLE', mode: known ? known.walk ? 'WALK' : 'TRANSIT' : null,
     source: known ? 'DEMO' : null, durationSeconds: known ? known.minutes * 60 : null,
-    distanceMeters: null, oneWayFareWon: known ? known.walk ? 0 : 1550 : null,
-    overLimitSeconds: null, segments: [], geometry: null, queriedAt: new Date().toISOString(),
+    distanceMeters: known ? (known.walk ? 850 : null) : null, oneWayFareWon: known ? known.walk ? 0 : 1550 : null,
+    overLimitSeconds: null, segments: [], geometry, queriedAt: new Date().toISOString(),
   }
 }
 
 function facilities(example: Example | undefined): HomePreview['facilities'] {
   return example ? [{
-    category: 'SUBWAY', status: 'FOUND', name: example.station, location: null,
+    category: 'SUBWAY', status: 'FOUND', name: example.station, location: { name: example.station, address: example.address, longitude: example.lng + 0.001, latitude: example.lat + 0.002 },
     distanceMeters: null, walkMinutes: example.stationMinutes, walkTimeSource: 'DEMO', searchRadiusMeters: 2000,
   }] : []
 }
@@ -172,7 +177,7 @@ export function createDemoCompareApi(restore: (id: string) => Session, persist: 
       const result: Comparison = {
         comparisonId: crypto.randomUUID(), inputRevision: revision, assessmentDate: session.assessmentDate,
         calculationVersion: 'demo-2026-11-19', isCurrent: true, status: homes.every(home => home.rank !== null) ? 'COMPLETE' : 'PARTIAL',
-        ...session.preferences, homes,
+        ...session.preferences, homes, destination: session.profile.frequentPlace,
         recommendation: {
           homeId: winner?.homeId ?? null, reasons: winner ? ['월 주거비가 역삼동 원룸보다 33만 원 낮아요.'] : [],
           tradeoffs: winner ? ['역삼동 원룸은 편도 이동시간이 17분 짧아요.'] : [],
