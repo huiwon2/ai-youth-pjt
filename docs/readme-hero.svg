@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="290" viewBox="0 0 960 290">
-  <title>First Home Navi — Seoul Youth AI Hackathon</title>
+  <title>첫집내비 — Seoul Youth AI Hackathon</title>
   <defs>
     <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
       <circle cx="3" cy="3" r="1.4" fill="#c8ddfa"/>
@@ -10,7 +10,7 @@
   <rect x="34" y="34" width="892" height="222" rx="24" fill="#f8fbff"/>
   <rect x="66" y="65" width="249" height="30" rx="15" fill="#d8eaff"/>
   <text x="190" y="85" text-anchor="middle" fill="#194884" font-family="system-ui, sans-serif" font-weight="700" font-size="13">SEOUL YOUTH AI HACKATHON · TEAM 26</text>
-  <text x="65" y="160" fill="#142e5b" font-family="system-ui, sans-serif" font-weight="800" font-size="60">First Home Navi</text>
+  <text x="65" y="160" fill="#142e5b" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans CJK KR, system-ui, sans-serif" font-weight="800" font-size="60">첫집내비</text>
   <text x="69" y="199" fill="#3c5b83" font-family="system-ui, sans-serif" font-size="20">Find support. Compare homes.</text>
   <path d="M594 210 C628 210 623 172 657 172 C695 172 699 220 748 221 C782 221 812 205 833 179" fill="none" stroke="#4e84cf" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 10"/>
   <circle cx="594" cy="210" r="9" fill="#a6dfff" stroke="#235999" stroke-width="3"/>
