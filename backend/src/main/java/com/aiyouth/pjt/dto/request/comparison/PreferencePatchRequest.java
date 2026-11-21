@@ -11,14 +11,15 @@ import jakarta.validation.constraints.NotNull;
  */
 public record PreferencePatchRequest(@NotNull PriorityPreset priorityPreset, Weights weights) {
 
-    public record Weights(int cost, int commute, int convenience) {
+    public record Weights(Integer cost, Integer commute, Integer convenience) {
         public static Weights of(PriorityPreset preset) {
             return new Weights(preset.cost(), preset.commute(), preset.convenience());
         }
 
         @JsonIgnore
         public boolean isValid() {
-            return cost >= 0 && cost <= 100 && commute >= 0 && commute <= 100
+            return cost != null && commute != null && convenience != null
+                    && cost >= 0 && cost <= 100 && commute >= 0 && commute <= 100
                     && convenience >= 0 && convenience <= 100 && cost + commute + convenience == 100;
         }
     }

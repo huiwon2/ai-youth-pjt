@@ -85,7 +85,7 @@ final class ProfileAnswers {
     static Profile profile(ProfileRow row, Location place, LocalDate date, ObjectMapper json) {
         ObjectNode answers = read(json, row);
         Integer birthYear = integer(answers, BIRTH_YEAR);
-        LocalDate answerDate = answers.path(ANSWER_DATE).isTextual()
+        LocalDate answerDate = answers.path(ANSWER_DATE).isString()
                 ? LocalDate.parse(answers.path(ANSWER_DATE).asString()) : null;
         Boolean storedAnswer = bool(answers, BIRTHDAY);
         Boolean currentAnswer = effectiveBirthday(storedAnswer, answerDate, date);
@@ -101,7 +101,7 @@ final class ProfileAnswers {
         return new Profile(birthYear, currentAnswer, answerDate, row == null ? null : row.employmentStatus(),
                 place, row == null ? null : row.availableCashWon(), income, commute,
                 object(answers, "moveIn", MoveIn.class, json), bool(answers, "ownsHome"),
-                answers.path("parentAddressStatus").isTextual() ? answers.path("parentAddressStatus").asString() : null,
+                answers.path("parentAddressStatus").isString() ? answers.path("parentAddressStatus").asString() : null,
                 age, monthlyIncome(income));
     }
 
