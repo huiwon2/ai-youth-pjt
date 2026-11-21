@@ -1,0 +1,663 @@
+[
+  {
+    "id": "Q01",
+    "category": "정책명",
+    "question": "근로·자녀장려금에서 맞벌이 가구의 근로장려금 최대 지급액은 얼마야?",
+    "policyKeys": [
+      "GOV24-105100000001"
+    ],
+    "facts": [
+      {
+        "label": "맞벌이 최대 330만원",
+        "pattern": "(?:330\\s*만|3[,.]?300[,.]?000\\s*원)",
+        "path": "benefit.text",
+        "quote": "맞벌이 가구 최대 330만 원"
+      }
+    ]
+  },
+  {
+    "id": "Q02",
+    "category": "자격·예외",
+    "question": "근로장려금을 신청하려면 재산 합계가 얼마 미만이어야 하고 어느 날짜의 재산을 봐?",
+    "policyKeys": [
+      "GOV24-105100000001"
+    ],
+    "facts": [
+      {
+        "label": "재산 2억4천만원 미만",
+        "pattern": "(?:2\\s*억\\s*4\\s*천|2\\s*억\\s*4[,.]?000|240[,.]?000[,.]?000)",
+        "path": "eligibility.criteria_text",
+        "quote": "재산 합계액이 2억4천만 원 미만"
+      },
+      {
+        "label": "전년도 6월 1일",
+        "pattern": "(?:전년|지난해)[\\s\\S]{0,30}(?:6\\s*월\\s*1\\s*일|6[./]1)",
+        "path": "eligibility.criteria_text",
+        "quote": "전년도 6월 1일 현재"
+      }
+    ]
+  },
+  {
+    "id": "Q03",
+    "category": "자격·예외",
+    "question": "대한민국 국적이 없는 사람은 근로·자녀장려금을 무조건 못 받아? 원문에 적힌 국적 조건의 예외도 알려줘.",
+    "policyKeys": [
+      "GOV24-105100000001"
+    ],
+    "facts": [
+      {
+        "label": "대한민국 국적자와 혼인한 경우 예외",
+        "pattern": "(?:대한민국|한국).{0,30}(?:혼인|결혼|배우자)",
+        "path": "eligibility.criteria_text",
+        "quote": "대한민국 국적을 보유한 자와 혼인한 자"
+      },
+      {
+        "label": "대한민국 국적 부양자녀가 있는 경우 예외",
+        "pattern": "(?:대한민국|한국).{0,35}(?:부양\\s*)?자녀",
+        "path": "eligibility.criteria_text",
+        "quote": "대한민국 국적의 부양자녀가 있는 자는 신청할 수 있음"
+      }
+    ]
+  },
+  {
+    "id": "Q04",
+    "category": "정책명",
+    "question": "주거급여 맞춤형 급여의 기준 중위소득 비율과 4인 가구 소득인정액 상한은?",
+    "policyKeys": [
+      "GOV24-336000000096"
+    ],
+    "facts": [
+      {
+        "label": "기준중위소득 48% 이하",
+        "pattern": "48\\s*%",
+        "path": "eligibility.criteria_text",
+        "quote": "기준 중위소득의 48% 이하"
+      },
+      {
+        "label": "4인 소득인정액 3117474원 이하",
+        "pattern": "3[,.]?117[,.]?474|311\\s*만\\s*7[,.]?474",
+        "path": "eligibility.criteria_text",
+        "quote": "4인 가구 기준 : 3,117,474원 이하"
+      }
+    ]
+  },
+  {
+    "id": "Q05",
+    "category": "상황설명",
+    "question": "기초생활수급자나 차상위 가구가 고효율 벽걸이 에어컨을 지원받는 정책이 있어? 무엇을 지원하는지 알려줘.",
+    "policyKeys": [
+      "GOV24-145000000107"
+    ],
+    "facts": [
+      {
+        "label": "고효율 벽걸이 에어컨 보급",
+        "pattern": "벽걸이.{0,15}에어컨|에어컨.{0,15}벽걸이",
+        "path": "benefit.text",
+        "quote": "고효율 벽걸이형 에어컨 보급 지원"
+      }
+    ]
+  },
+  {
+    "id": "Q06",
+    "category": "자격·예외",
+    "question": "저소득층 에너지효율개선 난방지원에서 공공임대주택은 모두 제외돼? 기존전세임대의 예외도 알려줘.",
+    "policyKeys": [
+      "GOV24-424000000006"
+    ],
+    "facts": [
+      {
+        "label": "공공임대주택 제외 원칙",
+        "pattern": "공공\\s*임대[\\s\\S]{0,90}(?:제외|불가|대상.{0,5}아니)|제외[\\s\\S]{0,200}공공\\s*임대",
+        "path": "eligibility.target_text",
+        "quote": "공공임대주택 가구(단, 기존전세임대는 가능 )"
+      },
+      {
+        "label": "기존전세임대는 가능",
+        "pattern": "기존\\s*전세\\s*임대[\\s\\S]{0,60}(?:가능|예외|지원)",
+        "path": "eligibility.target_text",
+        "quote": "단, 기존전세임대는 가능"
+      }
+    ]
+  },
+  {
+    "id": "Q07",
+    "category": "지역구분",
+    "question": "구로구에서 전세사기피해자로 결정된 무주택 임차인이야. 구로구 전세사기피해지원금 중 월세 지원은 한 달에 얼마까지, 최대 몇 개월 받을 수 있어?",
+    "policyKeys": [
+      "GOV24-316000000146"
+    ],
+    "facts": [
+      {
+        "label": "월 20만원 이내",
+        "pattern": "(?<![\\d,])20\\s*만",
+        "path": "benefit.text",
+        "quote": "월 20만원 이내"
+      },
+      {
+        "label": "최대 12개월",
+        "pattern": "12\\s*(?:개월|달)",
+        "path": "benefit.text",
+        "quote": "최대 12개월"
+      }
+    ]
+  },
+  {
+    "id": "Q08",
+    "category": "지역구분",
+    "question": "강동구에 사는 미취업 청년이야. 강동구 어학·자격시험 응시료 지원은 1인당 얼마까지이고 몇 번 받을 수 있어?",
+    "policyKeys": [
+      "YOUTHCENTER-20250424005400210720"
+    ],
+    "facts": [
+      {
+        "label": "1인당 최대 10만원",
+        "pattern": "(?<![\\d,])10\\s*만",
+        "path": "benefit.text",
+        "quote": "1인당 최대 10만원"
+      },
+      {
+        "label": "생애 1회",
+        "pattern": "생애\\s*(?:1|한)\\s*(?:회|번)",
+        "path": "benefit.text",
+        "quote": "생애1회"
+      }
+    ]
+  },
+  {
+    "id": "Q09",
+    "category": "정책명",
+    "question": "주택금융공사 월세자금보증의 최대 한도와 공사가 보증하는 대출금액 비율은 얼마야?",
+    "policyKeys": [
+      "GOV24-116010000001"
+    ],
+    "facts": [
+      {
+        "label": "최대 1152만원",
+        "pattern": "1[,.]?152\\s*만|11[,.]?520[,.]?000\\s*원",
+        "path": "benefit.text",
+        "quote": "최대 1,152만원 이내"
+      },
+      {
+        "label": "대출금액의 80% 보증",
+        "pattern": "80\\s*%",
+        "path": "benefit.text",
+        "quote": "대출금액의 80%를 공사가 보증"
+      }
+    ]
+  },
+  {
+    "id": "Q10",
+    "category": "정책명",
+    "question": "미소금융 금융취약계층 생계자금 지원의 대출한도와 금리 상한이 궁금해.",
+    "policyKeys": [
+      "GOV24-B55370100013"
+    ],
+    "facts": [
+      {
+        "label": "대출한도 최대 500만원",
+        "pattern": "5\\s*백\\s*만|500\\s*만|5[,.]?000[,.]?000\\s*원",
+        "path": "benefit.text",
+        "quote": "대출한도) 최대 5백만원"
+      },
+      {
+        "label": "금리 4.5% 이내",
+        "pattern": "4[.]5\\s*%",
+        "path": "benefit.text",
+        "quote": "대출금리) 4.5% 이내"
+      }
+    ]
+  },
+  {
+    "id": "Q11",
+    "category": "상황설명",
+    "question": "서울 안에서 원룸으로 이사한 20대 청년이야. 부동산 중개수수료랑 이사비를 지원받을 수 있다던데 최대 얼마이고 몇 번까지 받을 수 있어?",
+    "policyKeys": [
+      "YOUTHCENTER-20260614005400213232",
+      "YOUTHCENTER-20260618005400213241",
+      "GOV24-611000000170",
+      "GOV24-318000000431"
+    ],
+    "facts": [
+      {
+        "label": "최대 40만원",
+        "pattern": "(?<![\\d,])40\\s*만",
+        "path": "benefit.text",
+        "quote": "최대 40만원"
+      },
+      {
+        "label": "생애 1회",
+        "pattern": "생애\\s*(?:1|한)\\s*(?:회|번)",
+        "path": "benefit.text",
+        "quote": "생애 1회"
+      }
+    ]
+  },
+  {
+    "id": "Q12",
+    "category": "정책명",
+    "question": "2026 서울형 강소기업 육성 지원에서 청년을 정규직으로 채용한 기업은 근무환경개선금을 몇 명분까지, 최대 얼마 받고 언제 신청할 수 있어?",
+    "policyKeys": [
+      "YOUTHCENTER-20261021005400214166"
+    ],
+    "facts": [
+      {
+        "label": "기업당 3명",
+        "pattern": "3\\s*명",
+        "path": "benefit.text",
+        "quote": "기업당 3명"
+      },
+      {
+        "label": "최대 4,500만원",
+        "pattern": "4[,.]?500\\s*만|4\\s*천\\s*5\\s*백\\s*만",
+        "path": "benefit.text",
+        "quote": "최대 4,500만원"
+      },
+      {
+        "label": "12개월 만근 후",
+        "pattern": "12\\s*개월[\\s\\S]{0,10}만근",
+        "path": "benefit.text",
+        "quote": "12개월 만근"
+      }
+    ]
+  },
+  {
+    "id": "Q13",
+    "category": "상황설명",
+    "question": "성북구에 사는 1인 창조기업 예비창업자야. 사무실과 집을 같이 쓸 수 있는 공공임대주택이 있다던데, 기본 임대기간과 연장해서 최대 몇 년까지 살 수 있어?",
+    "policyKeys": [
+      "GOV24-307000000167"
+    ],
+    "facts": [
+      {
+        "label": "임대기간 2년",
+        "pattern": "(?<!\\d)2\\s*년",
+        "path": "benefit.text",
+        "quote": "임대기간 : 2년"
+      },
+      {
+        "label": "연장 4회",
+        "pattern": "연장\\s*4\\s*회|4\\s*회[\\s\\S]{0,6}연장",
+        "path": "benefit.text",
+        "quote": "연장 4회 가능"
+      },
+      {
+        "label": "최대 10년",
+        "pattern": "(?<!\\d)10\\s*년",
+        "path": "benefit.text",
+        "quote": "최대10년"
+      }
+    ]
+  },
+  {
+    "id": "Q14",
+    "category": "정책명",
+    "question": "2025년 2학기 서울해외교환학생장학금은 아시아와 비아시아 지역 장학금이 각각 얼마이고, 성적 기준은 몇 점 이상이야?",
+    "policyKeys": [
+      "YOUTHCENTER-20250316005400210638"
+    ],
+    "facts": [
+      {
+        "label": "아시아 400만원",
+        "pattern": "(?<![\\d,])400\\s*만",
+        "path": "benefit.text",
+        "quote": "아시아 : 400만원"
+      },
+      {
+        "label": "비아시아 550만원",
+        "pattern": "(?<![\\d,])550\\s*만",
+        "path": "benefit.text",
+        "quote": "비아시아 : 550만원"
+      },
+      {
+        "label": "백분위 85점 이상",
+        "pattern": "85\\s*점",
+        "path": "eligibility.target_text",
+        "quote": "85점 이상"
+      }
+    ]
+  },
+  {
+    "id": "Q15",
+    "category": "상황설명",
+    "question": "서울에 사는 기초생활수급자인데 집이 낡아서 도배랑 장판을 고치고 싶어. 희망의 집수리는 가구당 얼마까지 지원하고 소득 기준은 어떻게 돼?",
+    "policyKeys": [
+      "GOV24-611000019603"
+    ],
+    "facts": [
+      {
+        "label": "가구당 250만원",
+        "pattern": "(?<![\\d,])250\\s*만",
+        "path": "benefit.text",
+        "quote": "가구당 250만원"
+      },
+      {
+        "label": "기준중위소득 60% 이하",
+        "pattern": "60\\s*%",
+        "path": "benefit.text",
+        "quote": "기준중위소득 60% 이하"
+      }
+    ]
+  },
+  {
+    "id": "Q16",
+    "category": "지역구분",
+    "question": "서울시 청년 월세 지원은 월세를 한 달 최대 얼마, 몇 개월 지원해? 보증금과 월세 상한 기준도 알려줘.",
+    "policyKeys": [
+      "GOV24-611000000127",
+      "YOUTHCENTER-20261021005400214208"
+    ],
+    "facts": [
+      {
+        "label": "월 20만원",
+        "pattern": "(?<![\\d,])20\\s*만",
+        "path": "benefit.text",
+        "quote": "월 20만원 범위"
+      },
+      {
+        "label": "최대 12개월",
+        "pattern": "12\\s*(?:개월|달)",
+        "path": "benefit.text",
+        "quote": "최대 12개월"
+      },
+      {
+        "label": "보증금 8천만원 이하",
+        "pattern": "8\\s*천\\s*만|8,?000\\s*만",
+        "path": "eligibility.target_text",
+        "quote": "임차 보증금 8천만원 이하"
+      },
+      {
+        "label": "월세 60만원 이하",
+        "pattern": "(?<![\\d,])60\\s*만",
+        "path": "eligibility.target_text",
+        "quote": "월세 60만원 이하"
+      }
+    ]
+  },
+  {
+    "id": "Q17",
+    "category": "정책명",
+    "question": "2026 지역가치창업가 양성사업은 창업자금을 얼마 지원하고, 신청은 어떤 방식으로 접수해?",
+    "policyKeys": [
+      "YOUTHCENTER-20260722005400213265"
+    ],
+    "facts": [
+      {
+        "label": "창업자금 3천만원",
+        "pattern": "3\\s*천\\s*만|3,?000\\s*만",
+        "path": "benefit.text",
+        "quote": "창업자금 3천만원"
+      },
+      {
+        "label": "이메일 접수",
+        "pattern": "이메일|e-?mail",
+        "path": "application.method_text",
+        "quote": "이메일로 접수"
+      }
+    ]
+  },
+  {
+    "id": "Q18",
+    "category": "상황설명",
+    "question": "서울에 지은 지 20년 된 다세대주택을 갖고 있는데 창호를 에너지 효율 좋은 걸로 바꾸고 싶어. 새빛주택 지원은 공사비의 몇 %까지, 다세대는 최대 얼마야?",
+    "policyKeys": [
+      "GOV24-611000019637"
+    ],
+    "facts": [
+      {
+        "label": "순 공사비의 70% 이내",
+        "pattern": "70\\s*%",
+        "path": "benefit.text",
+        "quote": "순 공사비의 70%이내"
+      },
+      {
+        "label": "다세대·아파트 최대 300만원",
+        "pattern": "3\\s*백\\s*만|(?<![\\d,])300\\s*만",
+        "path": "benefit.text",
+        "quote": "다세대․아파트 최대 3백만 원"
+      }
+    ]
+  },
+  {
+    "id": "Q19",
+    "category": "지역구분",
+    "question": "서초구에 사는 자립준비청년(보호종료아동)이야. 서초구 자립정착금은 1년에 얼마를 주고, 서초구에 얼마나 살아야 받을 수 있어?",
+    "policyKeys": [
+      "GOV24-321000000121"
+    ],
+    "facts": [
+      {
+        "label": "연 500만원",
+        "pattern": "(?<![\\d,])500\\s*만",
+        "path": "benefit.text",
+        "quote": "연 500만원"
+      },
+      {
+        "label": "1년 이상 거주",
+        "pattern": "1\\s*년\\s*이상",
+        "path": "benefit.text",
+        "quote": "1년이상 거주"
+      }
+    ]
+  },
+  {
+    "id": "Q20",
+    "category": "상황설명",
+    "question": "양천구 신월지역에서 처음 가게를 여는 청년 창업자야. 신월지역 청년점포 사업에서 임차료와 리모델링비는 각각 최대 얼마까지 지원돼?",
+    "policyKeys": [
+      "YOUTHCENTER-20250822005400211521"
+    ],
+    "facts": [
+      {
+        "label": "임차료 최대 100만원",
+        "pattern": "(?<![\\d,])100\\s*만",
+        "path": "benefit.text",
+        "quote": "월 임차료의 50% 범위 안에서 최대 100만원"
+      },
+      {
+        "label": "리모델링비 최대 1,000만원",
+        "pattern": "1[,.]?000\\s*만|1\\s*천\\s*만",
+        "path": "benefit.text",
+        "quote": "최대 1,000만원"
+      }
+    ]
+  },
+  {
+    "id": "Q21",
+    "category": "지역구분",
+    "question": "구로구에서 보호가 끝난 자립준비청년이야. 구로형 자립정착금은 1인당 얼마이고 몇 살 이상이 대상이야?",
+    "policyKeys": [
+      "GOV24-316000000142"
+    ],
+    "facts": [
+      {
+        "label": "1인당 200만원",
+        "pattern": "(?<![\\d,])200\\s*만",
+        "path": "summary",
+        "quote": "1인당 200만원"
+      },
+      {
+        "label": "만 18세 이상",
+        "pattern": "18\\s*세",
+        "path": "benefit.text",
+        "quote": "만 18세 이상"
+      }
+    ]
+  },
+  {
+    "id": "Q22",
+    "category": "상황설명",
+    "question": "서울에 살면서 우울·불안 때문에 상담이 필요한 청년이야. 2026 서울 청년 마음건강 지원사업은 어디서 어떻게 신청해?",
+    "policyKeys": [
+      "YOUTHCENTER-20261021005400214192"
+    ],
+    "facts": [
+      {
+        "label": "청년몽땅정보통 사이트",
+        "pattern": "청년\\s*몽땅\\s*정보통|youth[.]seoul[.]go[.]kr",
+        "path": "application.method_text",
+        "quote": "청년몽땅정보통(youth.seoul.go.kr)"
+      },
+      {
+        "label": "온라인 신청",
+        "pattern": "온라인|인터넷",
+        "path": "application.method_text",
+        "quote": "온라인 신청"
+      }
+    ]
+  },
+  {
+    "id": "Q23",
+    "category": "상황설명",
+    "question": "동작구에 사는 미혼모야. 동작구 미혼모부 자립지원비는 1년에 최대 얼마이고, 동작구에 몇 개월 이상 살아야 해?",
+    "policyKeys": [
+      "GOV24-319000000129"
+    ],
+    "facts": [
+      {
+        "label": "연 최대 120만원",
+        "pattern": "1[,.]?200\\s*천|(?<![\\d,])120\\s*만",
+        "path": "benefit.text",
+        "quote": "최대 1,200천원/년"
+      },
+      {
+        "label": "6개월 이상 거주",
+        "pattern": "6\\s*개월\\s*이상",
+        "path": "eligibility.target_text",
+        "quote": "6개월 이상 거주"
+      }
+    ]
+  },
+  {
+    "id": "Q24",
+    "category": "공고검색",
+    "question": "강서염창 통합공공임대주택 최초 입주자 모집공고를 낸 기관과 임대주택 유형은 뭐야?",
+    "policyKeys": [
+      "LH-2015122300020807",
+      "LH-2015122300020753"
+    ],
+    "facts": [
+      {
+        "label": "한국토지주택공사 LH",
+        "pattern": "한국\\s*토지\\s*주택\\s*공사|\\bLH\\b",
+        "path": "organization",
+        "quote": "한국토지주택공사"
+      },
+      {
+        "label": "통합공공임대 유형",
+        "pattern": "통합\\s*공공\\s*임대",
+        "path": "benefit.type_text",
+        "quote": "통합공공임대"
+      }
+    ]
+  },
+  {
+    "id": "Q25",
+    "category": "공고검색",
+    "question": "LH 서울지역본부 26년 3차 신혼·신생아 매입임대Ⅰ 예비입주자 모집공고의 주택 유형은 뭐야?",
+    "policyKeys": [
+      "LH-2015122300020750"
+    ],
+    "facts": [
+      {
+        "label": "매입임대 유형",
+        "pattern": "매입\\s*임대",
+        "path": "benefit.type_text",
+        "quote": "매입임대"
+      }
+    ]
+  },
+  {
+    "id": "Q26",
+    "category": "정보부족",
+    "question": "강서염창 통합공공임대주택 정정공고의 신청 마감일과 마감 시각을 정확히 알려줘. 자료만으로 확정할 수 있어?",
+    "policyKeys": [
+      "LH-2015122300020807",
+      "LH-2015122300020753"
+    ],
+    "facts": [
+      {
+        "label": "마감일·시각 확정 불가 인정",
+        "pattern": "(?:확인|확정|알\\s*수|제공|명시|기재|포함)[\\s\\S]{0,35}(?:불가|없|않|어렵|부족)|(?:누락|명시되지|기재되지|제공되지|포함되어\\s*있지|정보가\\s*부족)",
+        "missingPaths": [
+          "application.end_date",
+          "application.method_text"
+        ]
+      }
+    ],
+    "forbiddenPatterns": [
+      "(?:17|18|23|24)\\s*시.{0,10}마감|마감.{0,10}(?:17|18|23|24)\\s*시"
+    ]
+  },
+  {
+    "id": "Q27",
+    "category": "정보부족",
+    "question": "LH 서울지역본부 26년 2차 비분양전환형 든든전세주택 공고의 보증금과 월 임대료를 각각 숫자로 알려줘. 원본 자료에 금액이 있나?",
+    "policyKeys": [
+      "LH-2015122300020843"
+    ],
+    "facts": [
+      {
+        "label": "보증금·임대료 금액 누락 인정",
+        "pattern": "(?:확인|확정|알\\s*수|제공|명시|기재|포함)[\\s\\S]{0,35}(?:불가|없|않|어렵|부족)|(?:누락|명시되지|기재되지|제공되지|포함되어\\s*있지|정보가\\s*부족)",
+        "missingPaths": [
+          "benefit.text",
+          "benefit.structured_amounts"
+        ]
+      }
+    ],
+    "forbiddenPatterns": [
+      "\\d[\\d,.]*\\s*(?:억|만\\s*원|천\\s*원|원)"
+    ]
+  },
+  {
+    "id": "Q28",
+    "category": "정보부족",
+    "question": "성북구 미취업 청년 어학·자격증 응시료 지원이 오늘 접수 중이라고 확정해 줄 수 있어? 신청 기간과 마감일이 원본에 확실히 적혀 있어?",
+    "policyKeys": [
+      "YOUTHCENTER-20240418005400200013"
+    ],
+    "facts": [
+      {
+        "label": "현재 접수·마감일 확정 불가 인정",
+        "pattern": "(?:확인|확정|알\\s*수|제공|명시|기재|포함)[\\s\\S]{0,35}(?:불가|없|않|어렵|부족)|(?:누락|명시되지|기재되지|제공되지|포함되어\\s*있지|정보가\\s*부족)",
+        "missingPaths": [
+          "application.period_text",
+          "application.start_date",
+          "application.end_date"
+        ]
+      }
+    ],
+    "forbiddenPatterns": [
+      "현재\\s*(?:접수|모집)\\s*중입니다|오늘\\s*(?:신청|접수).{0,5}가능합니다|마감일은\\s*\\d"
+    ]
+  },
+  {
+    "id": "Q29",
+    "category": "범위밖",
+    "question": "달로 이주하는 청년에게 5천만원을 주는 '달 이주 청년 정착지원금'이라는 제도가 이 자료에 있어? 지원금과 신청방법을 알려줘.",
+    "policyKeys": [],
+    "facts": [
+      {
+        "label": "존재하지 않는 제도임을 안내",
+        "pattern": "(?:찾|확인|제공|해당|관련|포함|존재|자료|정책|정보)[\\s\\S]{0,35}(?:없|않|불가|부족)|찾지\\s*못"
+      }
+    ],
+    "requireAbstention": true
+  },
+  {
+    "id": "Q30",
+    "category": "범위밖",
+    "question": "이 정책 자료를 근거로 내일 삼성전자 주식 종가가 정확히 몇 원일지 알려줘.",
+    "policyKeys": [],
+    "facts": [
+      {
+        "label": "주가 예측을 제공할 수 없음을 안내",
+        "pattern": "(?:예측|확인|제공|알\\s*수|관련|정책|정보)[\\s\\S]{0,35}(?:없|않|불가|어렵)|(?:다루지|범위.{0,10}벗어)"
+      }
+    ],
+    "requireAbstention": true,
+    "forbiddenPatterns": [
+      "\\d[\\d,.]*\\s*원"
+    ]
+  }
+]
