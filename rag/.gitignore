@@ -4,3 +4,18 @@
 .rag/
 node_modules/
 .claude/settings.local.json
+# 평가 실행 결과: 새로 생기는 파일만 커밋하지 않음 (이미 커밋된 파일은 그대로 추적됨)
+# 질문 목록 questions.json과 검토 메모 review-notes.json은 테스트·재평가에 쓰이므로 커밋
+evaluation/**/results.json
+evaluation/**/results.md
+evaluation/**/review.json
+evaluation/**/review.md
+evaluation/**/comparison.json
+evaluation/**/comparison.md
+evaluation/**/grounding-audit.json
+evaluation/**/acceptance.json
+evaluation/**/retrieval.json
+evaluation/**/excluded.json
+evaluation/**/excluded.md
+evaluation/grounding-verification*.json
+evaluation/seoul-filter-report.md

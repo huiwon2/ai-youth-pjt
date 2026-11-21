@@ -68,7 +68,8 @@ ODSAY_WEB_KEY=<ODsay 서버 API 키>
 | 키 | 기본값 | 의미 |
 |---|---|---|
 | `RAG_SERVICE_ENABLED` | `false` | 공고문 질문에 Python RAG 서비스를 호출. 꺼져 있거나 응답이 없으면 DB 원문 발췌로 대체 |
-| `RAG_SERVICE_URL` | `http://localhost:8000` | Python RAG 서비스 주소. 계약은 [docs/rag-service-contract.md](docs/rag-service-contract.md) |
+| `RAG_SERVICE_URL` | `http://localhost:8000` | RAG 서비스 주소. 계약은 [docs/rag-service-contract.md](docs/rag-service-contract.md) |
+| `RAG_SERVICE_TIMEOUT` | `15s` | RAG 응답 대기 한도. 프론트 로딩 기준과 같음. 넘으면 원문 발췌로 대체 |
 
 ## 3. DB 실행 (Docker)
 

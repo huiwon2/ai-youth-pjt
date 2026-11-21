@@ -5,7 +5,7 @@ Spring Boot가 `POST /api/v1/sessions/{sessionId}/policy-questions`를 받으면
 
 ## 호출
 
-`POST {RAG_SERVICE_URL}/v1/policy-answers` · `Content-Type: application/json` · 제한 시간 `RAG_SERVICE_TIMEOUT`(기본 8초)
+`POST {RAG_SERVICE_URL}/v1/policy-answers` · `Content-Type: application/json` · 응답 대기 `RAG_SERVICE_TIMEOUT`(기본 15초, 프론트 로딩 기준과 같음) · 연결 대기 3초
 
 ```json
 {"question": "이 정책은 언제 신청하나요?", "policyKey": "GOV24-000000000001", "assessmentDate": "2026-11-21"}
