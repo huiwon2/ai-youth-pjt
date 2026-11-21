@@ -30,15 +30,15 @@ export default function ComparisonPage({ session, comparisonId, mode, onSave, in
   return <div className="comparison-result">
     <div className="page-title"><h1>후보 집 비교 결과</h1><p><Link to={'/compare' + mode}>후보 목록으로</Link></p></div>
     {error ? <div role="alert">{error} <button onClick={() => { setError(''); setAttempt(value => value + 1) }}>다시 조회</button></div> : !result ? <p role="status">저장한 결과를 불러오는 중…</p> : <>
-      {(!result.isCurrent || result.inputRevision !== session.revision) && <p className="panel">저장된 이전 결과예요. 후보 목록에서 현재 조건으로 다시 비교할 수 있어요.</p>}
+      {(!result.isCurrent || result.inputRevision !== session.revision) && <p className="panel">이전 조건으로 만든 결과예요. 현재 후보로 다시 비교하려면 후보 목록으로 돌아가세요.</p>}
       {mode ? <EasyComparison result={result} /> : <>
-      <section className="result-banner"><p>비교 기준일 · {result.assessmentDate}</p>
+      <section className="result-banner"><p>{result.calculationVersion.startsWith('demo:') ? '시연 예시' : '추천 결과'} · {result.assessmentDate}</p>
         <h2>{winner ? '추천 후보 · ' + winner.label : '추천 순위 보류'}</h2>
         {[...result.recommendation.reasons, ...result.recommendation.tradeoffs].map(line => <p key={line}>{line}</p>)}
         {result.homes.every(home => home.cost.maintenanceWon === null) && <p>각 집의 관리비를 확인해 주세요.</p>}
       </section>
       <div className="panel comparison-table" tabIndex={0} role="region" aria-label="후보별 비교표">
-        <table><caption>후보별 비용과 이동 조건</caption>
+        <table><caption>후보별 비용과 이동 조건 {result.calculationVersion.startsWith('demo:') && '(예시)'}</caption>
           <thead><tr><th scope="col">비교 항목</th>{result.homes.map(home => <th scope="col" key={home.homeId}>{homeTitle(home)}<small>{home.location.address}</small></th>)}</tr></thead>
           <tbody>{comparisonRows.map(([name, format]) => <tr key={name}><th scope="row">{name}</th>{result.homes.map(home => <td key={home.homeId}>{format(home)}</td>)}</tr>)}</tbody>
         </table>

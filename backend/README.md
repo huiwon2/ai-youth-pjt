@@ -174,7 +174,7 @@ backend/src/main/
 - 수정 요청에 최신 `If-Match`가 없으면 `428 PRECONDITION_REQUIRED`, 값이 다르면 `412 REVISION_MISMATCH`입니다. 오래된 `inputRevision`으로 미리보기를 요청하면 `409 STALE_INPUT`입니다. 오류 응답은 아래 형식을 사용합니다.
 
 ```json
-{"error":{"code":"LOCATION_SELECTION_UNAVAILABLE","message":"주소를 다시 검색하고 선택해 주세요.","fields":[],"retryable":false},"requestId":"<요청 ID>"}
+{"error":{"code":"LOCATION_SELECTION_UNAVAILABLE","message":"선택한 주소를 다시 검색해 주세요.","fields":[],"retryable":false},"requestId":"<요청 ID>"}
 ```
 
 ### 실제 연동 설정

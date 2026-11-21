@@ -7,7 +7,6 @@ import type { LocationSearch, ProfilePatch, Session } from '../types/contracts'
 
 import { jobs, parents, moving } from '../utils/profileLabels'
 
-const destinationFieldIndex = 6
 const number = new Intl.NumberFormat('ko-KR')
 const equal = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
 
@@ -38,7 +37,7 @@ export default function ProfilePage({ session, easy, onSave, onError }: {
   const birthYear = /^\d{4}$/.test(birth) && Number(birth) >= 1000 && Number(birth) <= year ? Number(birth) : null
   const cashWon = won(cash)
   const incomeWon = won(income)
-  const destination = place ? { name: place.name, address: place.roadAddress ?? place.parcelAddress } : profile.frequentPlace
+  const destination = place ? { name: place.name, address: place.roadAddress ?? place.parcelAddress } : draft.needsPlace ? null : profile.frequentPlace
   const commuteLimit: ProfilePatch['commuteLimit'] = unlimited ? { type: 'NO_LIMIT' } :
     /^\d+$/.test(commute) && Number.isSafeInteger(Number(commute)) ? { type: 'LIMIT', minutes: Number(commute) } : null
   const moveIn = selected(moving, move)
@@ -91,10 +90,10 @@ export default function ProfilePage({ session, easy, onSave, onError }: {
       onSave(result)
       if (!result.progress.canEvaluate) setError('서버에서 확인이 필요한 항목이 있어요. 입력을 확인해 주세요.')
     } catch (reason) {
-      if (reason instanceof ApiError && reason.code === 'LOCATION_SELECTION_UNAVAILABLE') {
+      if (reason instanceof ApiError && reason.status === 404 && reason.code === 'LOCATION_SELECTION_UNAVAILABLE') {
+        update({ place: null, needsPlace: true, step: 7 })
         setResults(null)
-        setSearchError(errorMessage(reason))
-        update({ place: null, step: easy ? destinationFieldIndex + 1 : step })
+        setSearchError('목적지 선택이 만료됐어요. 다시 검색해 선택해 주세요.')
         return
       }
       setError(errorMessage(reason))
@@ -137,7 +136,7 @@ export default function ProfilePage({ session, easy, onSave, onError }: {
       {searchError && <small role="alert" className="error">{searchError}</small>}
       {results?.length === 0 && <small role="status">검색 결과가 없어요. 장소 이름이나 주소를 다시 확인해 주세요.</small>}
       {!!results?.length && <ul className="search-results">{results.map(item => <li key={item.locationId}>
-        <button className="secondary" type="button" disabled={!item.selectable} onClick={() => { update({ place: item }); setResults(null) }}>
+        <button className="secondary" type="button" disabled={!item.selectable} onClick={() => { update({ place: item, needsPlace: false }); setResults(null) }}>
           {item.name}<small>{item.roadAddress ?? item.parcelAddress}{!item.selectable && ' · 선택할 수 없는 주소'}</small>
         </button>
       </li>)}</ul>}
@@ -176,8 +175,8 @@ export default function ProfilePage({ session, easy, onSave, onError }: {
         <fieldset className="form-fields" disabled={saving}>
           {easy ? review ? <h2>입력한 답변을 확인해 주세요</h2> : fieldCard({ ...current, label: questionLabel }) : <>
             <h2>기본 정보</h2><div className="field-grid">{fields.slice(0, 4).map(fieldCard)}</div>
-            <h2>예산</h2><div className="field-grid">{fields.slice(4, destinationFieldIndex).map(fieldCard)}</div>
-            <h2>이사·이동 조건</h2><div className="field-grid">{fields.slice(destinationFieldIndex).map(fieldCard)}</div>
+            <h2>예산</h2><div className="field-grid">{fields.slice(4, 6).map(fieldCard)}</div>
+            <h2>이사·이동 조건</h2><div className="field-grid">{fields.slice(6).map(fieldCard)}</div>
           </>}
         </fieldset>
         {easy && <div className="actions">

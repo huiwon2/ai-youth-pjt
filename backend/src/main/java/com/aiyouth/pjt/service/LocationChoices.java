@@ -60,7 +60,7 @@ public class LocationChoices {
     }
 
     private static ApiException unavailable() {
-        return new ApiException(404, "LOCATION_SELECTION_UNAVAILABLE", "주소를 다시 검색하고 선택해 주세요.", false);
+        return new ApiException(404, "LOCATION_SELECTION_UNAVAILABLE", "선택한 주소를 다시 검색해 주세요.", false);
     }
 
     private record StoredChoice(SearchChoice choice, String source) {}

@@ -36,7 +36,7 @@ function FirstHome() {
       if (active) setSession(value)
     }).catch(reason => {
       if (!active) return
-      if (reason instanceof ApiError && [401, 404].includes(reason.status)) {
+      if (reason instanceof ApiError && reason.status === 401 && reason.code === 'SESSION_EXPIRED') {
         sessionStorage.removeItem(sessionKey)
         setError('이전 작업을 열 수 없어요. 홈에서 다시 시작해 주세요.')
       } else setRestoreError(errorMessage(reason))
@@ -64,7 +64,7 @@ function FirstHome() {
 
   function recover(reason: unknown) {
     if (!(reason instanceof ApiError)) return
-    if ([401, 404].includes(reason.status)) {
+    if (reason.status === 401 && reason.code === 'SESSION_EXPIRED') {
       sessionStorage.removeItem(sessionKey)
       setSession(null)
       setError('작업을 다시 시작해 주세요.')

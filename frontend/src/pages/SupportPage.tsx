@@ -131,9 +131,7 @@ export default function SupportPage({ session, easy, onError }: {
       <h2 id="scenario-title">만 35세일 때 예상 지원</h2>
       {scenarioPending && <p role="status">가정 조건을 확인하고 있어요…</p>}
       {scenarioError && <p role="alert" className="error">{scenarioError}</p>}
-      {scenario?.delta && <p>{scenario.delta.baseTotalWon === null && scenario.delta.scenarioTotalWon === null
-        ? '현재 조건과 가정 조건 모두 지원 금액을 확인 중이에요.'
-        : <>{money(scenario.delta.baseTotalWon)} → <strong>{money(scenario.delta.scenarioTotalWon)}</strong></>}</p>}
+      {scenario?.delta && <p>{money(scenario.delta.baseTotalWon)} → <strong>{money(scenario.delta.scenarioTotalWon)}</strong> {scenario.calculationVersion.startsWith('demo:') && '(예시)'}</p>}
       {scenario?.delta?.removedPolicyKeys.map(key => <p key={key}>{policies.find(policy => policy.policyKey === key)?.name ?? key} · 예상 금액에서 제외</p>)}
       <button className="secondary" onClick={() => setScenarioOpen(false)}>닫기</button>
     </section>}
@@ -145,7 +143,7 @@ export default function SupportPage({ session, easy, onError }: {
           policyKey: policy.policyKey, name: policy.name, amountWon: policy.benefit.potentialTotalWon, assessmentDate: result.assessmentDate,
         }])} />
     })}</div>
-    {policies.length === 0 && <p>아직 조회할 수 있는 정책 정보가 없어요.</p>}
+    {policies.length === 0 && <p>조회된 지원 정보가 없어요</p>}
     {result.conflicts.length > 0 && <section className="panel scenario"><h2>중복 수혜 안내</h2><ul>
       {result.conflicts.map(conflict => <li key={conflict.includedPolicyKey + ':' + conflict.excludedPolicyKey}>{conflict.reason}</li>)}
     </ul><Sources evidence={result.evidence} /></section>}
@@ -196,9 +194,9 @@ export default function SupportPage({ session, easy, onError }: {
     </details>
   </>
   return <>
-    <div className="page-title"><h1>받을 지원</h1><p>등록된 주거 지원과 확인할 조건을 살펴보세요.</p></div>
+    <div className="page-title"><h1>받을 지원</h1><p>내 조건과 공고 기준을 비교한 결과예요.</p></div>
     <section className="result-banner">
-      <p>{summary.targetYear}년 예상 지원 금액</p>
+      <p>{summary.targetYear}년 예상 지원 금액 {result.calculationVersion.startsWith('demo:') && <span className="tag">시연 예시</span>}</p>
       <strong>{money(summary.potentialTotalWon)}</strong>
       <p>{summary.totalStatus === 'PARTIAL' ? '확인된 금액만 반영했어요.' : summary.totalStatus === 'UNKNOWN' ? '공고에서 금액을 확인해 주세요.' : '지원별 세부 조건과 접수 상태를 확인해 주세요.'}</p>
       <small>판정 기준일 · {result.assessmentDate}</small>

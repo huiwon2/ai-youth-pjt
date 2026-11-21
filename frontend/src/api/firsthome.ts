@@ -1,6 +1,7 @@
 import type { Comparison, ComparisonAnswer, PriorityPreset, Home, HomePreview, HomePut, LocationSearch, PolicyAnswer, PolicyEvaluation, ProfilePatch, Session } from '../types/contracts'
 import { ApiError } from './errors'
 
+
 async function request<T>(path: string, method = 'GET', body?: unknown, revision?: number): Promise<T> {
   const response = await fetch('/api/v1/sessions' + path, {
     method,

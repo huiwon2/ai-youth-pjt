@@ -12,7 +12,7 @@ function initialAnswers({ profile }: Session) {
     cash: amount(profile.availableCashWon), income: amount(profile.income?.amountWon), period: profile.income?.period ?? 'MONTHLY',
     commute: profile.commuteLimit?.type === 'LIMIT' ? String(profile.commuteLimit.minutes) : '',
     unlimited: profile.commuteLimit?.type === 'NO_LIMIT', move: choice(profile.moveIn?.type),
-    query: '', place: null as LocationSearch['items'][number] | null, step: 0,
+    query: '', needsPlace: false, place: null as LocationSearch['items'][number] | null, step: 0,
   }
 }
 
@@ -23,7 +23,7 @@ export function useProfileDraft(session: Session) {
     try {
       const stored = JSON.parse(sessionStorage.getItem(key) ?? 'null')
       if (stored?.revision !== session.revision || stored.date !== session.assessmentDate) return initial
-      const answers = stored.answers
+      const answers = { needsPlace: false, ...stored.answers }
       if (!answers || !Number.isInteger(answers.step) || answers.step < 0 || answers.step > 10 ||
           Object.entries(initial).some(([field, value]) => typeof answers[field] !== typeof value) ||
           (answers.place !== null && typeof answers.place.locationId !== 'string')) return initial
