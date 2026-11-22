@@ -1,10 +1,12 @@
 import { join } from 'node:path';
 import { existsSync, writeFileSync } from 'node:fs';
 import { loadConfig, loadPolicies, chunkPolicy, Store, OpenAIClient, signature, indexEmbeddings, retrieve, applyRegionFilter } from './rag.mjs';
+import { toBackendAnswer } from './backend-format.mjs';
 
 const [command = 'help', ...args] = process.argv.slice(2);
 const lexicalOnly = args.includes('--lexical');
-const jsonOutput = args.includes('--json');
+const backendOutput = args.includes('--backend');
+const jsonOutput = args.includes('--json') || backendOutput;
 const positional = args.filter(arg => !arg.startsWith('--'));
 let config;
 let store;
@@ -50,7 +52,8 @@ try {
       else printSources(results);
     } else {
       const response = await client.answer(question, results.map(result => result.policy));
-      if (jsonOutput) console.log(JSON.stringify(response, null, 2));
+      if (backendOutput) console.log(JSON.stringify(toBackendAnswer(response), null, 2));
+      else if (jsonOutput) console.log(JSON.stringify(response, null, 2));
       else {
         console.log(response.answer);
         if (response.sources.length) {
@@ -136,6 +139,7 @@ try {
   node src/cli.mjs ask "청년 주거 지원 알려줘"
   node src/cli.mjs ask "근로장려금 조건" --lexical
   node src/cli.mjs search "청년 주거 지원" --json
+  node src/cli.mjs ask "청년 월세 지원 금액" --backend   (백엔드 API 6 형식 JSON)
   node --test`);
     if (command !== 'help') process.exitCode = 1;
   }
